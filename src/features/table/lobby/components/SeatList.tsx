@@ -1,23 +1,51 @@
 import { StyleSheet, Text, View } from "react-native";
-import type { LobbySnapshot } from "@/features/table/transport/lib/protocol";
+import type { Seat } from "@/features/euchre/lib/types";
+import type { LobbySnapshot, SeatKind } from "@/features/table/transport/lib/protocol";
+import { ActionButton } from "@/components/ActionButton";
 import { colors, radius, spacing, typography } from "@/lib/theme";
+
+const KIND_TAGS: Record<SeatKind, string> = {
+  host: "host",
+  human: "player",
+  bot: "bot",
+  open: "empty",
+};
 
 type SeatListProps = {
   lobby: LobbySnapshot;
-  mySeat: number | null;
+  mySeat: Seat | null;
+  /** Host only. Omitted for a client, which cannot change the seating. */
+  onAddBot?: (seat: Seat) => void;
+  onRemoveBot?: (seat: Seat) => void;
 };
 
-export const SeatList = ({ lobby, mySeat }: SeatListProps) => (
+export const SeatList = ({ lobby, mySeat, onAddBot, onRemoveBot }: SeatListProps) => (
   <View style={styles.list}>
     {lobby.players.map((player) => (
       <View key={player.seat} style={[styles.row, player.seat === mySeat && styles.mine]}>
         <View style={[styles.dot, player.connected && styles.dotOn]} />
         <Text style={styles.name}>{player.name}</Text>
         <Text style={styles.tag}>
-          {[player.isHost ? "host" : null, player.seat === mySeat ? "you" : null]
+          {[KIND_TAGS[player.kind], player.seat === mySeat ? "you" : null]
             .filter((tag) => tag !== null)
             .join(" · ")}
         </Text>
+        {player.kind === "bot" && onRemoveBot !== undefined ? (
+          <ActionButton
+            label="Remove"
+            tone="ghost"
+            compact
+            onPress={() => onRemoveBot(player.seat)}
+          />
+        ) : null}
+        {player.kind !== "bot" && player.kind !== "host" && !player.connected && onAddBot !== undefined ? (
+          <ActionButton
+            label="Add bot"
+            tone="secondary"
+            compact
+            onPress={() => onAddBot(player.seat)}
+          />
+        ) : null}
       </View>
     ))}
   </View>

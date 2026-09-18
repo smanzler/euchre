@@ -11,11 +11,14 @@ export type PlayerIntent = WithoutSeat<GameAction>;
 export const toAction = (intent: PlayerIntent, seat: Seat): GameAction =>
   ({ ...intent, seat }) as GameAction;
 
+export const SEAT_KINDS = ["host", "human", "bot", "open"] as const;
+export type SeatKind = (typeof SEAT_KINDS)[number];
+
 export type PlayerSlot = {
   seat: Seat;
   name: string;
   connected: boolean;
-  isHost: boolean;
+  kind: SeatKind;
 };
 
 export type LobbySnapshot = {
