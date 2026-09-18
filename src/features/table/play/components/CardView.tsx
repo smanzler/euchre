@@ -5,15 +5,27 @@ import { colors, radius } from "@/lib/theme";
 export const CARD_SIZES = ["sm", "md", "lg"] as const;
 export type CardSize = (typeof CARD_SIZES)[number];
 
-const sizes: Record<CardSize, { width: number; height: number; rank: number; pip: number }> = {
+export type CardBox = { width: number; height: number; rank: number; pip: number };
+
+const sizes: Record<CardSize, CardBox> = {
   sm: { width: 34, height: 48, rank: 12, pip: 14 },
   md: { width: 48, height: 68, rank: 16, pip: 22 },
   lg: { width: 62, height: 88, rank: 20, pip: 30 },
 };
 
+/** A playing card is close to 2:3, and the marks scale with the width. */
+export const cardBoxOfWidth = (width: number): CardBox => ({
+  width,
+  height: Math.round(width * 1.42),
+  rank: Math.round(width * 0.33),
+  pip: Math.round(width * 0.48),
+});
+
 type CardViewProps = {
   card: Card;
   size?: CardSize;
+  /** Overrides `size` when the caller measures the space itself. */
+  box?: CardBox;
   faceDown?: boolean;
   dimmed?: boolean;
   raised?: boolean;
@@ -23,12 +35,13 @@ type CardViewProps = {
 export const CardView = ({
   card,
   size = "md",
+  box: measured,
   faceDown = false,
   dimmed = false,
   raised = false,
   onPress,
 }: CardViewProps) => {
-  const box = sizes[size];
+  const box = measured ?? sizes[size];
   const suit = suitOf(card);
   const ink = colorOf(suit) === "red" ? colors.red : colors.black;
   const label = `${rankLabel(rankOf(card))} of ${suit}`;
