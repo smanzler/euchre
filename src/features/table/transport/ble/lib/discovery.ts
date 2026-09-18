@@ -6,19 +6,31 @@ import { requestScanPermissions } from "./permissions";
 
 export type FoundTable = { id: string; name: string };
 
+export type Advertisement = {
+  serviceData: Record<string, string> | null;
+  localName: string | null;
+  name: string | null;
+};
+
+/**
+ * An Android host puts the table name in service data because it cannot set
+ * the advertised local name; an iOS host sets the local name. The two
+ * platforms also disagree on the case of a uuid key.
+ */
+export const tableNameFrom = (advertisement: Advertisement): string => {
+  const entry = Object.entries(advertisement.serviceData ?? {}).find(
+    ([uuid]) => uuid.toLowerCase() === EUCHRE_SERVICE_UUID,
+  );
+  if (entry !== undefined) {
+    const decoded = utf8Decode(fromBase64(entry[1])).trim();
+    if (decoded.length > 0) return decoded;
+  }
+  return advertisement.localName ?? advertisement.name ?? "Euchre table";
+};
+
 export type ScanHandlers = {
   onFound(table: FoundTable): void;
   onError(message: string): void;
-};
-
-/** An Android host puts the table name in service data; iOS uses the local name. */
-const nameOf = (device: Device): string => {
-  const advertised = device.serviceData?.[EUCHRE_SERVICE_UUID];
-  if (advertised !== undefined && advertised !== null) {
-    const decoded = utf8Decode(fromBase64(advertised)).trim();
-    if (decoded.length > 0) return decoded;
-  }
-  return device.localName ?? device.name ?? "Euchre table";
 };
 
 /** Starts a scan and returns the call that stops it. */
@@ -44,7 +56,7 @@ export const scanForTables = (handlers: ScanHandlers): (() => void) => {
         return;
       }
       if (device === null) return;
-      handlers.onFound({ id: device.id, name: nameOf(device) });
+      handlers.onFound({ id: device.id, name: tableNameFrom(device as Advertisement) });
     });
   })();
 

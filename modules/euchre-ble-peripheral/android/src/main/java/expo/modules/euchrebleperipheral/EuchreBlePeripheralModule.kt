@@ -53,6 +53,8 @@ class EuchreBlePeripheralModule : Module() {
   private var advertiseCallback: AdvertiseCallback? = null
   private var startPromise: Promise? = null
 
+  /** The GATT callbacks arrive on binder threads, so every map is guarded. */
+  private val lock = Any()
   private val devices = mutableMapOf<String, BluetoothDevice>()
   private val mtus = mutableMapOf<String, Int>()
   private val outbox = mutableMapOf<String, ArrayDeque<ByteArray>>()
@@ -185,35 +187,51 @@ class EuchreBlePeripheralModule : Module() {
     runCatching { server?.close() }
     server = null
     notifier = null
-    devices.clear()
-    mtus.clear()
-    outbox.clear()
-    sending = false
+    synchronized(lock) {
+      devices.clear()
+      mtus.clear()
+      outbox.clear()
+      sending = false
+    }
   }
 
   private fun enqueue(centralId: String, value: ByteArray) {
-    if (!devices.containsKey(centralId)) {
-      throw PeripheralException("That player is not connected.")
+    synchronized(lock) {
+      if (!devices.containsKey(centralId)) {
+        throw PeripheralException("That player is not connected.")
+      }
+      outbox.getOrPut(centralId) { ArrayDeque() }.addLast(value)
     }
-    outbox.getOrPut(centralId) { ArrayDeque() }.addLast(value)
     pump()
   }
 
   /** One notification is in flight at a time; onNotificationSent sends the next. */
   private fun pump() {
-    if (sending) return
-    val characteristic = notifier ?: return
-    val gatt = server ?: return
-    for ((centralId, queue) in outbox) {
-      val value = queue.removeFirstOrNull() ?: continue
-      val device = devices[centralId] ?: continue
-      sending = true
-      val sent = runCatching { send(gatt, device, characteristic, value) }.getOrDefault(false)
-      if (!sent) {
-        sending = false
-        sendEvent("onPeripheralError", Bundle().apply { putString("message", "A frame was dropped.") })
+    var dropped: String? = null
+    synchronized(lock) {
+      if (sending) return
+      val characteristic = notifier ?: return
+      val gatt = server ?: return
+      for (centralId in devices.keys.toList()) {
+        val value = outbox[centralId]?.removeFirstOrNull() ?: continue
+        val device = devices[centralId] ?: continue
+        sending = true
+        val sent = runCatching { send(gatt, device, characteristic, value) }.getOrDefault(false)
+        if (!sent) {
+          sending = false
+          // The rest of this message would never reassemble; the next view is
+          // a whole snapshot, so drop the queue and let it resync.
+          outbox.remove(centralId)
+          dropped = centralId
+        }
+        break
       }
-      return
+    }
+    if (dropped != null) {
+      sendEvent(
+        "onPeripheralError",
+        Bundle().apply { putString("message", "A frame to $dropped was dropped.") }
+      )
     }
   }
 
@@ -237,14 +255,16 @@ class EuchreBlePeripheralModule : Module() {
     override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
       if (newState != BluetoothProfile.STATE_DISCONNECTED) return
       val id = device.address
-      devices.remove(id)
-      mtus.remove(id)
-      outbox.remove(id)
+      synchronized(lock) {
+        devices.remove(id)
+        mtus.remove(id)
+        outbox.remove(id)
+      }
       sendEvent("onCentralUnsubscribed", Bundle().apply { putString("id", id) })
     }
 
     override fun onMtuChanged(device: BluetoothDevice, mtu: Int) {
-      mtus[device.address] = mtu
+      synchronized(lock) { mtus[device.address] = mtu }
     }
 
     override fun onDescriptorWriteRequest(
@@ -264,18 +284,23 @@ class EuchreBlePeripheralModule : Module() {
         value.contentEquals(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
       val id = device.address
       if (enabled) {
-        devices[id] = device
+        val mtu = synchronized(lock) {
+          devices[id] = device
+          mtus[id] ?: DEFAULT_MTU
+        }
         sendEvent(
           "onCentralSubscribed",
           Bundle().apply {
             putString("id", id)
-            putInt("mtu", mtus[id] ?: DEFAULT_MTU)
+            putInt("mtu", mtu)
           }
         )
         return
       }
-      devices.remove(id)
-      outbox.remove(id)
+      synchronized(lock) {
+        devices.remove(id)
+        outbox.remove(id)
+      }
       sendEvent("onCentralUnsubscribed", Bundle().apply { putString("id", id) })
     }
 
@@ -302,7 +327,7 @@ class EuchreBlePeripheralModule : Module() {
     }
 
     override fun onNotificationSent(device: BluetoothDevice, status: Int) {
-      sending = false
+      synchronized(lock) { sending = false }
       pump()
     }
   }
