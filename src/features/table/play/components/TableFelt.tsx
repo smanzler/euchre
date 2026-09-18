@@ -43,6 +43,7 @@ export const TableFelt = ({ view, names }: TableFeltProps) => {
         onTurn={settled === null && view.turn === seat}
         wonTrick={settled !== null && settled.winner === seat}
         sittingOut={view.sittingOut === seat}
+        isDealer={view.dealer === seat}
         hideBacks={seat === view.seat}
       />
     );
