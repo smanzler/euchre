@@ -215,6 +215,11 @@ export const tableStore = {
     rebuild();
   },
 
+  restart(): void {
+    host?.restart();
+    rebuild();
+  },
+
   submit(seat: Seat, intent: PlayerIntent): void {
     if (host !== null) {
       const reason = host.submit(seat, intent);

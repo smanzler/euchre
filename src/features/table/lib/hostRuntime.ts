@@ -105,6 +105,13 @@ export class HostRuntime {
     this.publish();
   }
 
+  /** Deals a fresh game to the same table. */
+  restart(): void {
+    if (!this.started) return;
+    this.state = newGame({ rules: this.options.rules, dealer: HOST_SEAT });
+    this.publish();
+  }
+
   /** The reason the move was refused, or null when it was taken. */
   submit(seat: Seat, intent: PlayerIntent): string | null {
     if (this.state === null) return "the hand has not started";
