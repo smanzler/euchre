@@ -3,6 +3,7 @@ import type { Card, Suit } from "@/features/euchre/lib/cards";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 import { CardView } from "./CardView";
 import { DealerChip } from "./DealerChip";
+import { TrickCard } from "./TrickCard";
 import { MakerTag } from "./MakerTag";
 
 /** Enough of a card back to read the count without taking a seat's width. */
@@ -18,6 +19,9 @@ type SeatSpotProps = {
   isDealer: boolean;
   /** Set on the seat that named trump. */
   called: { trump: Suit; alone: boolean } | null;
+  /** Offset toward the seat taking the trick. Zero while the trick is live. */
+  gatherX: number;
+  gatherY: number;
   /** The seat the device belongs to holds its cards in the hand row. */
   hideBacks?: boolean;
 };
@@ -31,6 +35,8 @@ export const SeatSpot = ({
   sittingOut,
   isDealer,
   called,
+  gatherX,
+  gatherY,
   hideBacks = false,
 }: SeatSpotProps) => (
   <View style={styles.spot}>
@@ -40,7 +46,7 @@ export const SeatSpot = ({
     </View>
     {called === null ? null : <MakerTag trump={called.trump} alone={called.alone} />}
     {played !== null ? (
-      <CardView card={played} size="lg" dimmed={!wonTrick && sittingOut} />
+      <TrickCard card={played} gatherX={gatherX} gatherY={gatherY} />
     ) : sittingOut ? (
       <View style={styles.empty}>
         <Text style={styles.emptyText}>out</Text>

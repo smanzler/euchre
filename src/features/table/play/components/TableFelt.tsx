@@ -5,6 +5,17 @@ import { colors, radius, spacing, typography } from "@/lib/theme";
 import { FlipCard } from "./FlipCard";
 import { SeatSpot } from "./SeatSpot";
 
+/** How far a settled trick travels toward the seat that took it. */
+const GATHER_DISTANCE = 64;
+
+/** Screen direction of each seat, clockwise from the device's own seat. */
+const SEAT_DIRECTIONS: readonly { x: number; y: number }[] = [
+  { x: 0, y: 1 },
+  { x: -1, y: 0 },
+  { x: 0, y: -1 },
+  { x: 1, y: 0 },
+];
+
 type TableFeltProps = {
   view: PlayerView;
   names: Record<Seat, string>;
@@ -45,6 +56,11 @@ export const TableFelt = ({ view, names }: TableFeltProps) => {
   const plays = settled === null ? view.trick : settled.plays;
   const played = new Map(plays.map((play) => [play.seat, play.card]));
 
+  const toWinner =
+    settled === null
+      ? { x: 0, y: 0 }
+      : (SEAT_DIRECTIONS[(settled.winner - view.seat + 4) % 4] as { x: number; y: number });
+
   const spotAt = (clockwise: number) => {
     const seat = ((view.seat + clockwise) % 4) as Seat;
     return (
@@ -61,6 +77,8 @@ export const TableFelt = ({ view, names }: TableFeltProps) => {
             ? { trump: view.trump, alone: view.aloneSeat === seat }
             : null
         }
+        gatherX={toWinner.x * GATHER_DISTANCE}
+        gatherY={toWinner.y * GATHER_DISTANCE}
         hideBacks={seat === view.seat}
       />
     );
