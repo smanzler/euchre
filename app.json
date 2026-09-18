@@ -12,12 +12,14 @@
       "supportsTablet": true,
       "bundleIdentifier": "dev.p0.euchre",
       "infoPlist": {
-        "UIBackgroundModes": ["bluetooth-central", "bluetooth-peripheral"]
+        "UIBackgroundModes": [
+          "bluetooth-central",
+          "bluetooth-peripheral"
+        ]
       }
     },
     "android": {
       "package": "dev.p0.euchre",
-      "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "backgroundColor": "#0B3D2E",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -42,7 +44,10 @@
         "react-native-ble-plx",
         {
           "isBackgroundEnabled": true,
-          "modes": ["peripheral", "central"],
+          "modes": [
+            "peripheral",
+            "central"
+          ],
           "bluetoothAlwaysPermission": "Euchre uses Bluetooth to find and join nearby tables."
         }
       ]

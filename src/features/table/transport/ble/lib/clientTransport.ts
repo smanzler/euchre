@@ -88,7 +88,7 @@ const openClient = async (options: OpenOptions): Promise<Transport> => {
       queue = queue
         .then(async () => {
           for (const frame of frames) {
-            await connected.writeCharacteristicWithoutResponseForService(
+            await connected.writeCharacteristicWithResponseForService(
               EUCHRE_SERVICE_UUID,
               TO_HOST_CHARACTERISTIC_UUID,
               frame,

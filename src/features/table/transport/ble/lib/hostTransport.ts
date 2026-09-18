@@ -46,6 +46,11 @@ export const trimTableName = (name: string): string => {
 
 const openHost = async (options: OpenOptions): Promise<Transport> => {
   const { listener } = options;
+  const blocked = peripheralUnavailableReason();
+  if (blocked !== null) {
+    listener.onStatus("error", blocked);
+    throw new Error(blocked);
+  }
   listener.onStatus("starting", null);
   if (!(await requestAdvertisePermissions())) {
     listener.onStatus("error", "Bluetooth permission was refused.");

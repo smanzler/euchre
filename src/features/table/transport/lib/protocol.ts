@@ -63,7 +63,7 @@ export const FRAME_HEADER_BYTES = 3;
 
 export const MAX_CHUNKS = 256;
 
-/** Conservative for a 23 byte ATT MTU floor after negotiation fails. */
+/** Used until a connection reports its own MTU. */
 export const DEFAULT_CHUNK_BYTES = 180;
 
 export type Framer = {

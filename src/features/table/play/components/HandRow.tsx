@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
-import type { Card } from "@/features/euchre/lib/cards";
+import type { Card, Suit } from "@/features/euchre/lib/cards";
 import { sortForHand } from "@/features/euchre/lib/trick";
-import type { Suit } from "@/features/euchre/lib/cards";
 import { colors, spacing, typography } from "@/lib/theme";
 import { CardView } from "./CardView";
 

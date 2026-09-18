@@ -241,9 +241,16 @@ export const tableStore = {
 
   async leave(): Promise<void> {
     const open = transport;
+    transport = null;
+    if (open !== null) {
+      try {
+        await open.stop();
+      } catch {
+        // The radio may already be gone; the table closes either way.
+      }
+    }
     reset();
     snapshot = IDLE;
     emit();
-    if (open !== null) await open.stop();
   },
 };
