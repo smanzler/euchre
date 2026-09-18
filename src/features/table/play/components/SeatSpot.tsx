@@ -1,8 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
-import type { Card } from "@/features/euchre/lib/cards";
+import type { Card, Suit } from "@/features/euchre/lib/cards";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 import { CardView } from "./CardView";
 import { DealerChip } from "./DealerChip";
+import { MakerTag } from "./MakerTag";
 
 /** Enough of a card back to read the count without taking a seat's width. */
 const BACK_OVERLAP = -22;
@@ -15,6 +16,8 @@ type SeatSpotProps = {
   wonTrick: boolean;
   sittingOut: boolean;
   isDealer: boolean;
+  /** Set on the seat that named trump. */
+  called: { trump: Suit; alone: boolean } | null;
   /** The seat the device belongs to holds its cards in the hand row. */
   hideBacks?: boolean;
 };
@@ -27,6 +30,7 @@ export const SeatSpot = ({
   wonTrick,
   sittingOut,
   isDealer,
+  called,
   hideBacks = false,
 }: SeatSpotProps) => (
   <View style={styles.spot}>
@@ -34,6 +38,7 @@ export const SeatSpot = ({
       <Text style={[styles.name, onTurn && styles.onTurn, wonTrick && styles.winner]}>{name}</Text>
       {isDealer ? <DealerChip /> : null}
     </View>
+    {called === null ? null : <MakerTag trump={called.trump} alone={called.alone} />}
     {played !== null ? (
       <CardView card={played} size="lg" dimmed={!wonTrick && sittingOut} />
     ) : sittingOut ? (

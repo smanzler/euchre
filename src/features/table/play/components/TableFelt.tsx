@@ -11,7 +11,15 @@ type TableFeltProps = {
 };
 
 /** The upcard sits on the felt while it can still be taken or turned down. */
-const FeltCentre = ({ view, settledBy }: { view: PlayerView; settledBy: string | null }) => {
+const FeltCentre = ({
+  view,
+  names,
+  settledBy,
+}: {
+  view: PlayerView;
+  names: Record<Seat, string>;
+  settledBy: string | null;
+}) => {
   if (settledBy !== null) return <Text style={styles.centreLabel}>{settledBy} took it</Text>;
   if (view.upcard !== null) {
     const turnedDown = view.phase === "bidding-call";
@@ -23,7 +31,12 @@ const FeltCentre = ({ view, settledBy }: { view: PlayerView; settledBy: string |
     );
   }
   if (view.trump === null) return <Text style={styles.centreLabel}>no trump yet</Text>;
-  return null;
+  if (view.maker === null) return null;
+  return (
+    <Text style={styles.centreLabel}>
+      {names[view.maker]} called it{view.aloneSeat === null ? "" : ", alone"}
+    </Text>
+  );
 };
 
 export const TableFelt = ({ view, names }: TableFeltProps) => {
@@ -43,6 +56,11 @@ export const TableFelt = ({ view, names }: TableFeltProps) => {
         wonTrick={settled !== null && settled.winner === seat}
         sittingOut={view.sittingOut === seat}
         isDealer={view.dealer === seat}
+        called={
+          view.maker === seat && view.trump !== null
+            ? { trump: view.trump, alone: view.aloneSeat === seat }
+            : null
+        }
         hideBacks={seat === view.seat}
       />
     );
@@ -54,7 +72,11 @@ export const TableFelt = ({ view, names }: TableFeltProps) => {
       <View style={styles.middle}>
         {spotAt(1)}
         <View style={styles.centre}>
-          <FeltCentre view={view} settledBy={settled === null ? null : names[settled.winner]} />
+          <FeltCentre
+            view={view}
+            names={names}
+            settledBy={settled === null ? null : names[settled.winner]}
+          />
         </View>
         {spotAt(3)}
       </View>
