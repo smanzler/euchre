@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import type { Seat } from "@/features/euchre/lib/types";
 import type { PlayerView } from "@/features/euchre/lib/view";
 import { colors, radius, spacing, typography } from "@/lib/theme";
-import { CardView } from "./CardView";
+import { FlipCard } from "./FlipCard";
 import { SeatSpot } from "./SeatSpot";
 
 type TableFeltProps = {
@@ -25,7 +25,7 @@ const FeltCentre = ({
     const turnedDown = view.phase === "bidding-call";
     return (
       <View style={styles.upcard}>
-        <CardView card={view.upcard} size="md" dimmed={turnedDown} />
+        <FlipCard card={view.upcard} size="md" dimmed={turnedDown} flipKey={view.handNumber} />
         <Text style={styles.centreLabel}>{turnedDown ? "turned down" : "turned up"}</Text>
       </View>
     );
