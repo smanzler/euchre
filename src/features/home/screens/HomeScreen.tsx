@@ -18,11 +18,14 @@ export const HomeScreen = () => {
   const bleHost = tableStore.driverFor("ble-host");
   const hostBlocked = bleHost.unavailableReason();
 
-  const open = async (kind: "local" | "ble-host"): Promise<void> => {
+  const open = async (
+    kind: "local" | "ble-host",
+    fillWithBots = false,
+  ): Promise<void> => {
     setBusy(true);
     setError(null);
     try {
-      await tableStore.host({ kind, tableName, displayName });
+      await tableStore.host({ kind, tableName, displayName, fillWithBots });
       router.push("/lobby");
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : String(caught));
@@ -69,6 +72,15 @@ export const HomeScreen = () => {
           tone="secondary"
           disabled={busy}
           onPress={() => void open("local")}
+        />
+      </Panel>
+
+      <Panel title="Play on your own">
+        <ActionButton
+          label="Play against bots"
+          tone="secondary"
+          disabled={busy}
+          onPress={() => void open("local", true)}
         />
       </Panel>
 

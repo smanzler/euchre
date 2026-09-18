@@ -12,19 +12,41 @@ Bluetooth needs native code, so Expo Go cannot run this app. Build a
 development client once, then iterate with Metro:
 
 ```sh
-npm install
+pnpm install
 npx expo prebuild          # writes ios/ and android/
-npm run ios                # or: npm run android
+pnpm ios                   # or: pnpm android
 ```
 
-`npm start` then reloads JavaScript into the installed dev client.
+`pnpm start` then reloads JavaScript into the installed dev client.
+
+You do not need a second device to try the game: **Play against bots**
+runs a full four handed game on one device with no radio at all.
 
 ## Play
 
-- **Host over Bluetooth** advertises the table. Three phones join it.
-- **Find nearby tables** scans for a host and takes the next open seat.
+- **Host over Bluetooth** advertises the table. Three phones join it. Fill
+  any seat nobody takes with a bot.
+- **Find nearby tables** scans for a host and takes the next open seat. A
+  late arrival takes a bot's chair if no seat is open.
+- **Play against bots** deals you in against three of them, with no radio.
 - **Pass and play** runs all four seats on one device, with a handoff
   screen between turns.
+
+## Bots
+
+A bot is a pure function from the view a seat is allowed to see to the
+move it makes, in `src/features/table/bots/lib/`. It counts a hand in
+hundredths of a trick, so a threshold never lands on a floating point
+edge: bowers, trump, off suit aces and a void with trump to ruff. It
+orders up at about three tricks and goes alone near five. In play it
+pulls trump as the maker, leads an off suit ace otherwise, takes a trick
+with the cheapest card that wins, and throws its lowest card under a
+partner who already holds it. It never deals the next hand, because a
+person reads the score.
+
+The host runs a bot's move on a timer so the table is readable. Tests
+pass a scheduler that runs at once, which lets one test play a whole
+game of bots against bots to ten points.
 
 ## Rules
 
@@ -43,6 +65,7 @@ src/features/
   euchre/lib/            the rules, with no react and no io
   table/
     lib/                 host and client runtimes, and the store the ui reads
+    bots/lib/            hand values and the move a bot makes
     lobby/, play/        the screens and their parts
     transport/
       lib/               the driver interface, the registry and the wire format
@@ -65,6 +88,7 @@ advertises one service with two characteristics, one that clients write to
 and one that notifies them. Messages are JSON, cut into base64 frames that
 fit the negotiated MTU and rebuilt on the far side.
 
-The rules engine, the protocol and the host runtime are covered by tests
-(`npm test`) and the app bundles for Android. The native module has not run
-on hardware yet: build the dev client on two devices to try it.
+The rules engine, the protocol, the bots and the host runtime are covered
+by tests (`pnpm test`), including a host joined to three clients through
+the real framer. The native module has not run on hardware yet: build the
+dev client on two devices to try it.

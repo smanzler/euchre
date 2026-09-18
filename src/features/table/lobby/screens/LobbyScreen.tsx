@@ -57,7 +57,12 @@ export const LobbyScreen = () => {
         {lobby === null ? (
           <Text style={styles.note}>Waiting for the host…</Text>
         ) : (
-          <SeatList lobby={lobby} mySeat={table.seat} />
+          <SeatList
+            lobby={lobby}
+            mySeat={table.seat}
+            onAddBot={table.mode === "hosting" ? tableStore.addBot : undefined}
+            onRemoveBot={table.mode === "hosting" ? tableStore.removeBot : undefined}
+          />
         )}
       </Panel>
 
@@ -66,7 +71,7 @@ export const LobbyScreen = () => {
           <Text style={styles.note}>
             {table.canStart
               ? "Every seat is taken. Deal them in."
-              : "Waiting for the other players to join."}
+              : "Waiting for the other players. Fill an empty seat with a bot to start now."}
           </Text>
           <ActionButton
             label="Start the game"
