@@ -58,11 +58,6 @@ const OrderUpControls = ({ view, onIntent }: PhaseControlsProps) => {
   const isDealer = view.seat === view.dealer;
   return (
     <View style={styles.panel}>
-      {view.upcard === null ? null : (
-        <Text style={styles.prompt}>
-          Turned up: <Text style={styles.strong}>{cardLabel(view.upcard)}</Text>
-        </Text>
-      )}
       <Row>
         <AloneToggle alone={alone} onChange={setAlone} />
       </Row>
@@ -136,10 +131,7 @@ const phasePanels: Record<Phase, PhasePanel> = {
     playable: noCards,
   },
   "bidding-call": {
-    status: (view, names) =>
-      `${names[view.turn]} to name trump${
-        view.upcard === null ? "" : ` (${cardLabel(view.upcard)} turned down)`
-      }`,
+    status: (view, names) => `${names[view.turn]} to name trump`,
     Controls: CallTrumpControls,
     cardIntent: null,
     actableOffTurn: false,
@@ -186,5 +178,4 @@ const styles = StyleSheet.create({
   panel: { gap: spacing.sm, alignItems: "center" },
   row: { flexDirection: "row", gap: spacing.sm, flexWrap: "wrap", justifyContent: "center" },
   prompt: { ...typography.body, color: colors.inkMuted, textAlign: "center" },
-  strong: { color: colors.ink, fontWeight: "800" },
 });
