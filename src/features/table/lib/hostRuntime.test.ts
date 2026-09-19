@@ -89,6 +89,25 @@ describe("HostRuntime lobby", () => {
     expect(runtime.lobby().players[2]).toMatchObject({ name: "Bo", connected: false });
   });
 
+  it("names a seat the host holds, and refuses a remote player's seat", () => {
+    const { runtime } = hostedTable();
+    seatThree(runtime);
+    expect(runtime.renamableSeats()).toEqual([0]);
+    runtime.renameSeat(0, "Sammy");
+    runtime.renameSeat(1, "Not Ada");
+    expect(runtime.lobby().players[0]?.name).toBe("Sammy");
+    expect(runtime.lobby().players[1]?.name).toBe("Ada");
+  });
+
+  it("stops naming seats once the game is under way", () => {
+    const { runtime } = hostedTable();
+    seatThree(runtime);
+    runtime.start();
+    runtime.renameSeat(0, "Sammy");
+    expect(runtime.renamableSeats()).toEqual([]);
+    expect(runtime.lobby().players[0]?.name).toBe("Sam");
+  });
+
   it("refuses to start before the table is full", () => {
     const { runtime } = hostedTable();
     runtime.start();
@@ -197,6 +216,12 @@ describe("HostRuntime bots", () => {
     expect(lobby.players.map((player) => player.kind)).toEqual(["host", "bot", "bot", "bot"]);
     expect(lobby.canStart).toBe(true);
     expect(runtime.localSeats()).toEqual([0]);
+  });
+
+  it("names a bot's seat", () => {
+    const runtime = soloTable();
+    runtime.renameSeat(2, "Nora");
+    expect(runtime.lobby().players[2]).toMatchObject({ name: "Nora", kind: "bot" });
   });
 
   it("gives a seat back when a bot is removed", () => {
