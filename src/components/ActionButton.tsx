@@ -22,6 +22,8 @@ type ActionButtonProps = {
   tone?: ButtonTone;
   disabled?: boolean;
   compact?: boolean;
+  /** Fills the width of the row it sits in. */
+  wide?: boolean;
 };
 
 export const ActionButton = ({
@@ -30,6 +32,7 @@ export const ActionButton = ({
   tone = "primary",
   disabled = false,
   compact = false,
+  wide = false,
 }: ActionButtonProps) => {
   const style = tones[tone];
   return (
@@ -41,6 +44,7 @@ export const ActionButton = ({
       style={({ pressed }) => [
         styles.base,
         compact && styles.compact,
+        wide && styles.wide,
         style.box,
         pressed && styles.pressed,
         disabled && styles.disabled,
@@ -60,6 +64,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   compact: { paddingVertical: spacing.sm, paddingHorizontal: spacing.lg },
+  wide: { alignSelf: "stretch" },
   pressed: { opacity: 0.7 },
   disabled: { opacity: 0.35 },
   label: { ...typography.body, fontWeight: "700" },

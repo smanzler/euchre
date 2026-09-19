@@ -1,5 +1,5 @@
 import { type ComponentType, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   type Card,
   type Suit,
@@ -13,7 +13,8 @@ import type { PlayerView } from "@/features/euchre/lib/view";
 import { TEAM_NAMES } from "@/features/table/lib/seats";
 import type { PlayerIntent } from "@/features/table/transport/lib/protocol";
 import { ActionButton } from "@/components/ActionButton";
-import { colors, spacing, typography } from "@/lib/theme";
+import { spacing } from "@/lib/theme";
+import { SuitButton } from "../components/SuitButton";
 
 export type SeatNames = Record<Seat, string>;
 
@@ -55,7 +56,6 @@ const AloneToggle = ({ alone, onChange }: { alone: boolean; onChange: (next: boo
 
 const OrderUpControls = ({ view, onIntent }: PhaseControlsProps) => {
   const [alone, setAlone] = useState(false);
-  const isDealer = view.seat === view.dealer;
   return (
     <View style={styles.panel}>
       <Row>
@@ -63,10 +63,16 @@ const OrderUpControls = ({ view, onIntent }: PhaseControlsProps) => {
       </Row>
       <Row>
         <ActionButton
-          label={isDealer ? "Pick it up" : "Order it up"}
+          compact
+          label={view.seat === view.dealer ? "Pick it up" : "Order it up"}
           onPress={() => onIntent({ type: "order-up", alone })}
         />
-        <ActionButton label="Pass" tone="secondary" onPress={() => onIntent({ type: "pass" })} />
+        <ActionButton
+          compact
+          label="Pass"
+          tone="secondary"
+          onPress={() => onIntent({ type: "pass" })}
+        />
       </Row>
     </View>
   );
@@ -77,27 +83,25 @@ const CallTrumpControls = ({ view, onIntent }: PhaseControlsProps) => {
   const mustCall = view.rules.stickTheDealer && view.seat === view.dealer;
   return (
     <View style={styles.panel}>
-      <Text style={styles.prompt}>
-        {mustCall ? "You are stuck — name a suit." : "Name a suit, or pass."}
-      </Text>
-      <Row>
-        <AloneToggle alone={alone} onChange={setAlone} />
-      </Row>
       <Row>
         {view.callableSuits.map((suit) => (
-          <ActionButton
+          <SuitButton
             key={suit}
-            compact
-            label={`${suitSymbol(suit)} ${suitName(suit)}`}
+            suit={suit}
             onPress={() => onIntent({ type: "call-trump", suit, alone })}
           />
         ))}
       </Row>
-      {mustCall ? null : (
-        <Row>
-          <ActionButton label="Pass" tone="secondary" onPress={() => onIntent({ type: "pass" })} />
-        </Row>
-      )}
+      <Row>
+        <AloneToggle alone={alone} onChange={setAlone} />
+        <ActionButton
+          compact
+          label={mustCall ? "You are stuck" : "Pass"}
+          tone="secondary"
+          disabled={mustCall}
+          onPress={() => onIntent({ type: "pass" })}
+        />
+      </Row>
     </View>
   );
 };
@@ -177,5 +181,4 @@ export const panelFor = (phase: Phase): PhasePanel => phasePanels[phase];
 const styles = StyleSheet.create({
   panel: { gap: spacing.sm, alignItems: "center" },
   row: { flexDirection: "row", gap: spacing.sm, flexWrap: "wrap", justifyContent: "center" },
-  prompt: { ...typography.body, color: colors.inkMuted, textAlign: "center" },
 });
