@@ -32,6 +32,10 @@ runs a full four handed game on one device with no radio at all.
 - **Pass and play** runs all four seats on one device, with a handoff
   screen between turns.
 
+The host names any seat it holds in the lobby, so a bot and a shared
+seat read as the person who sits there. A player who joins over
+Bluetooth keeps the name they sent.
+
 The menu on the table goes back to the main menu without closing the
 table, and the main menu offers the table back. The table lives in
 memory, so it is gone once the app stops.

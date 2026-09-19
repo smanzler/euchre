@@ -80,6 +80,22 @@ export class HostRuntime {
     return local[0] ?? HOST_SEAT;
   }
 
+  /** The seats whose name the host sets. A remote player keeps the name it sent. */
+  renamableSeats(): Seat[] {
+    if (this.started) return [];
+    return SEATS.filter((seat) => {
+      const kind = this.seats[seat]?.kind;
+      return kind === "local" || kind === "bot";
+    });
+  }
+
+  renameSeat(seat: Seat, name: string): void {
+    const occupant = this.seats[seat];
+    if (!this.renamableSeats().includes(seat) || occupant === null) return;
+    this.seats[seat] = { ...occupant, name };
+    this.publish();
+  }
+
   /** Gives a seat to a bot. The host always keeps its own seat. */
   addBot(seat: Seat): void {
     if (this.started || seat === HOST_SEAT) return;
