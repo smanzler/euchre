@@ -88,7 +88,6 @@ export const TableFelt = ({ view, names }: TableFeltProps) => {
 const styles = StyleSheet.create({
   felt: {
     flex: 1,
-    minHeight: 320,
     backgroundColor: colors.felt,
     borderRadius: radius.lg,
     borderWidth: 2,
