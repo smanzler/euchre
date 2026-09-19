@@ -1,4 +1,3 @@
-import type { Device } from "react-native-ble-plx";
 import { fromBase64, utf8Decode } from "../../lib/bytes";
 import { getBleManager } from "./bleManager";
 import { EUCHRE_SERVICE_UUID } from "./constants";
