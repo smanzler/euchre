@@ -4,7 +4,6 @@ import type { PlayerView } from "@/features/euchre/lib/view";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 import { CardView } from "./CardView";
 import { SeatSpot } from "./SeatSpot";
-import { TrumpBadge } from "./TrumpBadge";
 
 type TableFeltProps = {
   view: PlayerView;
@@ -24,7 +23,7 @@ const FeltCentre = ({ view, settledBy }: { view: PlayerView; settledBy: string |
     );
   }
   if (view.trump === null) return <Text style={styles.centreLabel}>no trump yet</Text>;
-  return <TrumpBadge trump={view.trump} size="emblem" withName />;
+  return null;
 };
 
 export const TableFelt = ({ view, names }: TableFeltProps) => {

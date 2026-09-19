@@ -21,7 +21,7 @@ export const Scoreboard = ({ view }: ScoreboardProps) => (
       ))}
       <View style={styles.trump}>
         <Text style={styles.teamName}>TRUMP</Text>
-        <TrumpBadge trump={view.trump} withName />
+        <TrumpBadge trump={view.trump} />
       </View>
     </View>
     <Text style={styles.target}>first to {view.rules.pointsToWin}</Text>
