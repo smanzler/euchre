@@ -1,5 +1,4 @@
 import { StyleSheet, Text, View } from "react-native";
-import { suitSymbol } from "@/features/euchre/lib/cards";
 import type { Seat } from "@/features/euchre/lib/types";
 import type { PlayerView } from "@/features/euchre/lib/view";
 import { colors, radius, spacing, typography } from "@/lib/theme";
@@ -24,7 +23,7 @@ const FeltCentre = ({ view, settledBy }: { view: PlayerView; settledBy: string |
     );
   }
   if (view.trump === null) return <Text style={styles.centreLabel}>no trump yet</Text>;
-  return <Text style={styles.centreTrump}>{suitSymbol(view.trump)}</Text>;
+  return null;
 };
 
 export const TableFelt = ({ view, names }: TableFeltProps) => {
@@ -85,5 +84,4 @@ const styles = StyleSheet.create({
   centre: { flex: 1, alignItems: "center", justifyContent: "center", gap: spacing.xs },
   upcard: { alignItems: "center", gap: spacing.xs },
   centreLabel: { ...typography.label, color: colors.inkMuted, textAlign: "center" },
-  centreTrump: { fontSize: 44, color: colors.accent },
 });
