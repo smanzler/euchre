@@ -1,31 +1,18 @@
 import { StyleSheet, Text, View } from "react-native";
 import { suitSymbol } from "@/features/euchre/lib/cards";
-import { SEATS, type Seat } from "@/features/euchre/lib/types";
+import type { Seat } from "@/features/euchre/lib/types";
 import type { PlayerView } from "@/features/euchre/lib/view";
-import { type SeatPosition, positionOf } from "@/features/table/lib/seats";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 import { CardView } from "./CardView";
+import { SeatSpot } from "./SeatSpot";
 
 type TableFeltProps = {
   view: PlayerView;
   names: Record<Seat, string>;
 };
 
-const slotStyles: Record<SeatPosition, object> = {
-  bottom: { bottom: spacing.sm, alignSelf: "center" },
-  left: { left: spacing.sm, top: "40%" },
-  top: { top: spacing.sm, alignSelf: "center" },
-  right: { right: spacing.sm, top: "40%" },
-};
-
 /** The upcard sits on the felt while it can still be taken or turned down. */
-const FeltCentre = ({
-  view,
-  settledBy,
-}: {
-  view: PlayerView;
-  settledBy: string | null;
-}) => {
+const FeltCentre = ({ view, settledBy }: { view: PlayerView; settledBy: string | null }) => {
   if (settledBy !== null) return <Text style={styles.centreLabel}>{settledBy} took it</Text>;
   if (view.upcard !== null) {
     const turnedDown = view.phase === "bidding-call";
@@ -46,40 +33,32 @@ export const TableFelt = ({ view, names }: TableFeltProps) => {
   const plays = settled === null ? view.trick : settled.plays;
   const played = new Map(plays.map((play) => [play.seat, play.card]));
 
+  const spotAt = (clockwise: number) => {
+    const seat = ((view.seat + clockwise) % 4) as Seat;
+    return (
+      <SeatSpot
+        name={names[seat]}
+        cardsHeld={view.handSizes[seat]}
+        played={played.get(seat) ?? null}
+        onTurn={settled === null && view.turn === seat}
+        wonTrick={settled !== null && settled.winner === seat}
+        sittingOut={view.sittingOut === seat}
+        hideBacks={seat === view.seat}
+      />
+    );
+  };
+
   return (
     <View style={styles.felt}>
-      {SEATS.map((seat) => {
-        const position = positionOf(seat, view.seat);
-        const card = played.get(seat);
-        const isOut = view.sittingOut === seat;
-        const tookIt = settled !== null && settled.winner === seat;
-        return (
-          <View key={seat} style={[styles.slot, slotStyles[position]]}>
-            <Text
-              style={[
-                styles.name,
-                settled === null && view.turn === seat && styles.nameOnTurn,
-                tookIt && styles.nameWinner,
-              ]}
-            >
-              {names[seat]}
-              {view.dealer === seat ? "  (D)" : ""}
-            </Text>
-            {card !== undefined ? (
-              <CardView card={card} size="md" dimmed={settled !== null && !tookIt} />
-            ) : (
-              <View style={styles.placeholder}>
-                <Text style={styles.placeholderText}>
-                  {isOut ? "out" : `${view.handSizes[seat]}`}
-                </Text>
-              </View>
-            )}
-          </View>
-        );
-      })}
-      <View style={styles.centre}>
-        <FeltCentre view={view} settledBy={settled === null ? null : names[settled.winner]} />
+      <View style={styles.band}>{spotAt(2)}</View>
+      <View style={styles.middle}>
+        {spotAt(1)}
+        <View style={styles.centre}>
+          <FeltCentre view={view} settledBy={settled === null ? null : names[settled.winner]} />
+        </View>
+        {spotAt(3)}
       </View>
+      <View style={styles.band}>{spotAt(0)}</View>
     </View>
   );
 };
@@ -87,30 +66,23 @@ export const TableFelt = ({ view, names }: TableFeltProps) => {
 const styles = StyleSheet.create({
   felt: {
     flex: 1,
-    minHeight: 260,
+    minHeight: 320,
     backgroundColor: colors.felt,
     borderRadius: radius.lg,
     borderWidth: 2,
     borderColor: colors.feltEdge,
-    margin: spacing.xs,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xs,
+    justifyContent: "space-between",
   },
-  slot: { position: "absolute", alignItems: "center", gap: spacing.xs },
-  name: { ...typography.label, color: colors.inkDim },
-  nameOnTurn: { color: colors.accent },
-  nameWinner: { color: colors.good },
-  placeholder: {
-    width: 48,
-    height: 68,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderStyle: "dashed",
-    borderColor: colors.feltEdge,
+  band: { alignItems: "center" },
+  middle: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
   },
-  placeholderText: { ...typography.label, color: colors.inkDim },
-  centre: { flex: 1, alignItems: "center", justifyContent: "center" },
+  centre: { flex: 1, alignItems: "center", justifyContent: "center", gap: spacing.xs },
   upcard: { alignItems: "center", gap: spacing.xs },
-  centreLabel: { ...typography.label, color: colors.inkMuted },
+  centreLabel: { ...typography.label, color: colors.inkMuted, textAlign: "center" },
   centreTrump: { fontSize: 44, color: colors.accent },
 });
