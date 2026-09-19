@@ -18,6 +18,28 @@ const slotStyles: Record<SeatPosition, object> = {
   right: { right: spacing.sm, top: "40%" },
 };
 
+/** The upcard sits on the felt while it can still be taken or turned down. */
+const FeltCentre = ({
+  view,
+  settledBy,
+}: {
+  view: PlayerView;
+  settledBy: string | null;
+}) => {
+  if (settledBy !== null) return <Text style={styles.centreLabel}>{settledBy} took it</Text>;
+  if (view.upcard !== null) {
+    const turnedDown = view.phase === "bidding-call";
+    return (
+      <View style={styles.upcard}>
+        <CardView card={view.upcard} size="md" dimmed={turnedDown} />
+        <Text style={styles.centreLabel}>{turnedDown ? "turned down" : "turned up"}</Text>
+      </View>
+    );
+  }
+  if (view.trump === null) return <Text style={styles.centreLabel}>no trump yet</Text>;
+  return <Text style={styles.centreTrump}>{suitSymbol(view.trump)}</Text>;
+};
+
 export const TableFelt = ({ view, names }: TableFeltProps) => {
   // The trick clears the moment it is won, so keep the last one on the felt.
   const settled = view.trick.length === 0 ? view.lastTrick : null;
@@ -56,13 +78,7 @@ export const TableFelt = ({ view, names }: TableFeltProps) => {
         );
       })}
       <View style={styles.centre}>
-        {settled !== null ? (
-          <Text style={styles.centreLabel}>{names[settled.winner]} took it</Text>
-        ) : view.trump === null ? (
-          <Text style={styles.centreLabel}>no trump yet</Text>
-        ) : (
-          <Text style={styles.centreTrump}>{suitSymbol(view.trump)}</Text>
-        )}
+        <FeltCentre view={view} settledBy={settled === null ? null : names[settled.winner]} />
       </View>
     </View>
   );
@@ -94,6 +110,7 @@ const styles = StyleSheet.create({
   },
   placeholderText: { ...typography.label, color: colors.inkDim },
   centre: { flex: 1, alignItems: "center", justifyContent: "center" },
+  upcard: { alignItems: "center", gap: spacing.xs },
   centreLabel: { ...typography.label, color: colors.inkMuted },
   centreTrump: { fontSize: 44, color: colors.accent },
 });
