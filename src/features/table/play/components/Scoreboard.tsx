@@ -1,5 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
-import { TEAMS, type Seat, type Team, seatsOfTeam } from "@/features/euchre/lib/types";
+import {
+  TEAMS,
+  type Seat,
+  type Team,
+  seatsOfTeam,
+} from "@/features/euchre/lib/types";
 import type { PlayerView } from "@/features/euchre/lib/view";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 import { TrumpBadge } from "./TrumpBadge";
@@ -15,7 +20,10 @@ const TrickPips = ({ won, mine }: { won: number; mine: boolean }) => (
     {Array.from({ length: TRICKS_PER_HAND }, (_unused, index) => (
       <View
         key={index}
-        style={[styles.pip, index < won && (mine ? styles.pipMine : styles.pipTheirs)]}
+        style={[
+          styles.pip,
+          index < won && (mine ? styles.pipMine : styles.pipTheirs),
+        ]}
       />
     ))}
   </View>
@@ -58,10 +66,7 @@ const TeamColumn = ({
 export const Scoreboard = ({ view, names }: ScoreboardProps) => (
   <View style={styles.bar}>
     <TeamColumn view={view} team={TEAMS[0]} names={names} />
-    <View style={styles.middle}>
-      <TrumpBadge trump={view.trump} />
-      <Text style={styles.target}>to {view.rules.pointsToWin}</Text>
-    </View>
+    <TrumpBadge trump={view.trump} />
     <TeamColumn view={view} team={TEAMS[1]} names={names} />
   </View>
 );
@@ -82,7 +87,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   mine: { borderColor: colors.accent },
-  teamName: { ...typography.label, color: colors.inkDim, fontSize: 10, letterSpacing: 0.5 },
+  teamName: {
+    ...typography.label,
+    color: colors.inkDim,
+    fontSize: 10,
+    letterSpacing: 0.5,
+  },
   score: { fontSize: 28, fontWeight: "800", color: colors.ink, lineHeight: 32 },
   track: {
     alignSelf: "stretch",
@@ -95,7 +105,12 @@ const styles = StyleSheet.create({
   fillMine: { backgroundColor: colors.accent },
   fillTheirs: { backgroundColor: colors.inkDim },
   pips: { flexDirection: "row", gap: 3, paddingTop: 2 },
-  pip: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.feltDeep },
+  pip: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.feltDeep,
+  },
   pipMine: { backgroundColor: colors.good },
   pipTheirs: { backgroundColor: colors.inkMuted },
 });
