@@ -10,7 +10,6 @@ type TableFeltProps = {
   names: Record<Seat, string>;
 };
 
-/** The upcard sits on the felt while it can still be taken or turned down. */
 const FeltCentre = ({
   view,
   names,
@@ -21,14 +20,9 @@ const FeltCentre = ({
   settledBy: string | null;
 }) => {
   if (settledBy !== null) return <Text style={styles.centreLabel}>{settledBy} took it</Text>;
+  // A dimmed upcard is the suit the table turned down and may not name.
   if (view.upcard !== null) {
-    const turnedDown = view.phase === "bidding-call";
-    return (
-      <View style={styles.upcard}>
-        <CardView card={view.upcard} size="md" dimmed={turnedDown} />
-        <Text style={styles.centreLabel}>{turnedDown ? "turned down" : "turned up"}</Text>
-      </View>
-    );
+    return <CardView card={view.upcard} size="md" dimmed={view.phase === "bidding-call"} />;
   }
   if (view.trump === null) return <Text style={styles.centreLabel}>no trump yet</Text>;
   if (view.maker === null) return null;
@@ -103,6 +97,5 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   centre: { flex: 1, alignItems: "center", justifyContent: "center", gap: spacing.xs },
-  upcard: { alignItems: "center", gap: spacing.xs },
   centreLabel: { ...typography.label, color: colors.inkMuted, textAlign: "center" },
 });
