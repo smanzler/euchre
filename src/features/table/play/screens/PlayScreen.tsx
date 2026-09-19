@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { ActionButton } from "@/components/ActionButton";
 import { Panel } from "@/components/Panel";
 import { Screen } from "@/components/Screen";
@@ -14,6 +14,9 @@ import { HandoffGate } from "../components/HandoffGate";
 import { Scoreboard } from "../components/Scoreboard";
 import { TableFelt } from "../components/TableFelt";
 import { panelFor } from "../lib/phasePanels";
+
+/** The felt and the hand keep their place, so only this band changes with the phase. */
+const ACTION_HEIGHT = 148;
 
 export const PlayScreen = () => {
   const router = useRouter();
@@ -63,44 +66,49 @@ export const PlayScreen = () => {
       <Scoreboard view={view} />
       <TableFelt view={view} names={names} />
 
-      <View style={styles.status}>
-        <Text style={styles.statusText}>{panel.status(view, names)}</Text>
-        {table.error === null ? null : (
-          <Text style={styles.error} onPress={() => tableStore.clearError()}>
-            {table.error}
-          </Text>
-        )}
+      <View style={styles.action}>
+        <ScrollView contentContainerStyle={styles.actionBody}>
+          <Text style={styles.statusText}>{panel.status(view, names)}</Text>
+          {table.error === null ? null : (
+            <Text style={styles.error} onPress={() => tableStore.clearError()}>
+              {table.error}
+            </Text>
+          )}
+          {canAct && Controls !== null ? (
+            <Controls view={view} names={names} onIntent={send} />
+          ) : null}
+          {view.phase === "game-over" ? (
+            <View style={styles.endRow}>
+              {table.mode === "hosting" ? (
+                <ActionButton label="Play again" onPress={() => tableStore.restart()} />
+              ) : null}
+              <ActionButton label="Leave" tone="secondary" onPress={leave} />
+            </View>
+          ) : null}
+        </ScrollView>
       </View>
 
-      {canAct && Controls !== null ? (
-        <Controls view={view} names={names} onIntent={send} />
-      ) : null}
-
-      {view.phase === "game-over" ? (
-        <View style={styles.endRow}>
-          {table.mode === "hosting" ? (
-            <ActionButton label="Play again" onPress={() => tableStore.restart()} />
-          ) : null}
-          <ActionButton label="Leave" tone="secondary" onPress={leave} />
-        </View>
-      ) : (
-        <HandRow
-          hand={view.hand}
-          trump={view.trump}
-          playable={canAct && cardIntent !== null ? panel.playable(view) : []}
-          onPlay={
-            canAct && cardIntent !== null ? (card) => send(cardIntent(card)) : null
-          }
-        />
-      )}
+      <HandRow
+        hand={view.hand}
+        trump={view.trump}
+        playable={canAct && cardIntent !== null ? panel.playable(view) : []}
+        onPlay={canAct && cardIntent !== null ? (card) => send(cardIntent(card)) : null}
+        note={view.sittingOut === view.seat ? "You sit this hand out." : null}
+      />
     </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  status: { alignItems: "center", gap: spacing.xs },
+  action: { height: ACTION_HEIGHT },
+  actionBody: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sm,
+  },
   statusText: { ...typography.heading, color: colors.ink, textAlign: "center" },
   note: { ...typography.body, color: colors.inkMuted },
   error: { ...typography.body, color: colors.danger, textAlign: "center" },
-  endRow: { flexDirection: "row", gap: spacing.md, justifyContent: "center", paddingVertical: spacing.lg },
+  endRow: { flexDirection: "row", gap: spacing.md, justifyContent: "center" },
 });
