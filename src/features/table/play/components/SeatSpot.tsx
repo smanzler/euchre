@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import type { Card } from "@/features/euchre/lib/cards";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 import { CardView } from "./CardView";
+import { DealerChip } from "./DealerChip";
 
 /** Enough of a card back to read the count without taking a seat's width. */
 const BACK_OVERLAP = -22;
@@ -13,6 +14,7 @@ type SeatSpotProps = {
   onTurn: boolean;
   wonTrick: boolean;
   sittingOut: boolean;
+  isDealer: boolean;
   /** The seat the device belongs to holds its cards in the hand row. */
   hideBacks?: boolean;
 };
@@ -24,10 +26,14 @@ export const SeatSpot = ({
   onTurn,
   wonTrick,
   sittingOut,
+  isDealer,
   hideBacks = false,
 }: SeatSpotProps) => (
   <View style={styles.spot}>
-    <Text style={[styles.name, onTurn && styles.onTurn, wonTrick && styles.winner]}>{name}</Text>
+    <View style={styles.label}>
+      <Text style={[styles.name, onTurn && styles.onTurn, wonTrick && styles.winner]}>{name}</Text>
+      {isDealer ? <DealerChip /> : null}
+    </View>
     {played !== null ? (
       <CardView card={played} size="lg" dimmed={!wonTrick && sittingOut} />
     ) : sittingOut ? (
@@ -50,6 +56,7 @@ export const SeatSpot = ({
 
 const styles = StyleSheet.create({
   spot: { alignItems: "center", gap: spacing.xs, minHeight: 112 },
+  label: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
   name: { ...typography.label, color: colors.inkDim },
   onTurn: { color: colors.accent },
   winner: { color: colors.good },
