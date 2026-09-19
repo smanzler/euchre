@@ -63,7 +63,7 @@ export const PlayScreen = () => {
 
   return (
     <Screen>
-      <Scoreboard view={view} />
+      <Scoreboard view={view} names={names} />
       <TableFelt view={view} names={names} />
 
       <View style={styles.action}>
