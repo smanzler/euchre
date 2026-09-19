@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import { TEAMS, type Seat, type Team } from "@/features/euchre/lib/types";
+import { TEAMS, type Seat, type Team, seatsOfTeam } from "@/features/euchre/lib/types";
 import type { PlayerView } from "@/features/euchre/lib/view";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 import { TrumpBadge } from "./TrumpBadge";
@@ -7,9 +7,6 @@ import { TrumpBadge } from "./TrumpBadge";
 const TRICKS_PER_HAND = 5;
 
 type ScoreboardProps = { view: PlayerView; names: Record<Seat, string> };
-
-/** A team holds the two facing seats. */
-const seatsOfTeam = (team: Team): readonly Seat[] => [team as Seat, ((team + 2) % 4) as Seat];
 
 const myTeam = (view: PlayerView): Team => (view.seat % 2) as Team;
 
