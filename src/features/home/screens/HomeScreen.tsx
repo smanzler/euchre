@@ -4,6 +4,7 @@ import { StyleSheet, Text, TextInput, View } from "react-native";
 import { ActionButton } from "@/components/ActionButton";
 import { Panel } from "@/components/Panel";
 import { Screen } from "@/components/Screen";
+import { useTable } from "@/features/table/hooks/useTable";
 import { tableStore } from "@/features/table/lib/tableStore";
 import { profileStore, useDisplayName } from "@/lib/profile";
 import { colors, radius, spacing, typography } from "@/lib/theme";
@@ -11,6 +12,7 @@ import { colors, radius, spacing, typography } from "@/lib/theme";
 export const HomeScreen = () => {
   const router = useRouter();
   const displayName = useDisplayName();
+  const table = useTable();
   const [tableName, setTableName] = useState("Kitchen table");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +42,23 @@ export const HomeScreen = () => {
         <Text style={styles.title}>Euchre</Text>
         <Text style={styles.subtitle}>Four players, twenty four cards, bowers and all.</Text>
       </View>
+
+      {table.mode === "idle" ? null : (
+        <Panel title="Your table">
+          <Text style={styles.note}>
+            {table.lobby?.tableName ?? "A table"} is still open on this device.
+          </Text>
+          <ActionButton
+            label={table.started ? "Back to the game" : "Back to the lobby"}
+            onPress={() => router.push(table.started ? "/play" : "/lobby")}
+          />
+          <ActionButton
+            label="Close the table"
+            tone="ghost"
+            onPress={() => void tableStore.leave()}
+          />
+        </Panel>
+      )}
 
       <Panel title="You">
         <TextInput
