@@ -13,6 +13,8 @@ export const otherTeam = (team: Team): Team => (1 - team) as Team;
 
 export const partnerOf = (seat: Seat): Seat => ((seat + 2) % 4) as Seat;
 
+export const seatsOfTeam = (team: Team): readonly Seat[] => [team as Seat, partnerOf(team as Seat)];
+
 export const nextSeat = (seat: Seat): Seat => ((seat + 1) % 4) as Seat;
 
 export const isSeat = (value: unknown): value is Seat =>

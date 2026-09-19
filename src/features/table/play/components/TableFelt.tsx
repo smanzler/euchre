@@ -19,7 +19,7 @@ const FeltCentre = ({
   names: Record<Seat, string>;
   settledBy: string | null;
 }) => {
-  if (settledBy !== null) return <Text style={styles.centreLabel}>{settledBy} took it</Text>;
+  if (settledBy !== null) return <Text style={styles.trickWinner}>{settledBy} took it</Text>;
   // A dimmed upcard is the suit the table turned down and may not name.
   if (view.upcard !== null) {
     return <CardView card={view.upcard} size="md" dimmed={view.phase === "bidding-call"} />;
@@ -98,4 +98,5 @@ const styles = StyleSheet.create({
   },
   centre: { flex: 1, alignItems: "center", justifyContent: "center", gap: spacing.xs },
   centreLabel: { ...typography.label, color: colors.inkMuted, textAlign: "center" },
+  trickWinner: { ...typography.body, fontWeight: "800", color: colors.good, textAlign: "center" },
 });
