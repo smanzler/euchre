@@ -62,6 +62,8 @@ export const LobbyScreen = () => {
             mySeat={table.seat}
             onAddBot={table.mode === "hosting" ? tableStore.addBot : undefined}
             onRemoveBot={table.mode === "hosting" ? tableStore.removeBot : undefined}
+            onRename={table.mode === "hosting" ? tableStore.renameSeat : undefined}
+            renamable={table.renamableSeats}
           />
         )}
       </Panel>
