@@ -47,6 +47,8 @@ export type HostOptions = {
   kind: Extract<TransportKind, "local" | "ble-host">;
   tableName: string;
   displayName: string;
+  /** Gives every other seat to a bot as soon as the table opens. */
+  fillWithBots?: boolean;
   rules?: Partial<GameRules>;
   seed?: number;
 };
@@ -167,6 +169,7 @@ export const tableStore = {
       onChange: rebuild,
     });
     host = runtime;
+    if (options.fillWithBots === true) runtime.fillWithBots();
     rebuild();
     try {
       transport = await openTransport(options.kind, {
@@ -218,6 +221,14 @@ export const tableStore = {
   restart(): void {
     host?.restart();
     rebuild();
+  },
+
+  addBot(seat: Seat): void {
+    host?.addBot(seat);
+  },
+
+  removeBot(seat: Seat): void {
+    host?.removeBot(seat);
   },
 
   submit(seat: Seat, intent: PlayerIntent): void {

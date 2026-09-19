@@ -1,6 +1,7 @@
 import type { Seat } from "@/features/euchre/lib/types";
 import { parseHostMessage } from "../transport/lib/protocol";
 import type { PeerId, Transport } from "../transport/lib/types";
+import { chooseIntent } from "../bots/lib/policy";
 import { HostRuntime } from "./hostRuntime";
 
 type Sent = { peer: PeerId; text: string };
@@ -50,7 +51,7 @@ describe("HostRuntime lobby", () => {
   it("keeps the host at seat zero and leaves the rest open", () => {
     const { runtime } = hostedTable();
     const lobby = runtime.lobby();
-    expect(lobby.players[0]).toMatchObject({ name: "Sam", isHost: true, connected: true });
+    expect(lobby.players[0]).toMatchObject({ name: "Sam", kind: "host", connected: true });
     expect(lobby.players.filter((player) => player.connected)).toHaveLength(1);
     expect(lobby.canStart).toBe(false);
   });
@@ -173,5 +174,110 @@ describe("HostRuntime pass and play", () => {
     const runtime = passAndPlay();
     runtime.start();
     expect(runtime.submit(3, { type: "pass" })).toBe("it is not your turn");
+  });
+});
+
+describe("HostRuntime bots", () => {
+  const soloTable = () => {
+    const runtime = new HostRuntime({
+      tableName: "Kitchen",
+      hostName: "Sam",
+      holdsEverySeat: false,
+      seed: 99,
+      scheduleBotMove: (run) => run(),
+      onChange: () => {},
+    });
+    runtime.fillWithBots();
+    return runtime;
+  };
+
+  it("fills every seat but the host's own", () => {
+    const runtime = soloTable();
+    const lobby = runtime.lobby();
+    expect(lobby.players.map((player) => player.kind)).toEqual(["host", "bot", "bot", "bot"]);
+    expect(lobby.canStart).toBe(true);
+    expect(runtime.localSeats()).toEqual([0]);
+  });
+
+  it("gives a seat back when a bot is removed", () => {
+    const runtime = soloTable();
+    runtime.removeBot(2);
+    expect(runtime.lobby().players[2]).toMatchObject({ kind: "open", connected: false });
+    expect(runtime.lobby().canStart).toBe(false);
+  });
+
+  it("never gives the host's seat to a bot", () => {
+    const runtime = soloTable();
+    runtime.addBot(0);
+    expect(runtime.lobby().players[0]?.kind).toBe("host");
+  });
+
+  it("runs the bots up to the human's turn as soon as the hand opens", () => {
+    const runtime = soloTable();
+    runtime.start();
+    const view = runtime.view();
+    expect(view).not.toBeNull();
+    expect(view?.seat).toBe(0);
+    // Seats 1 to 3 are bots, so play stops only where the human must act.
+    expect(view?.turn === 0 || view?.phase === "hand-over").toBe(true);
+  });
+
+  it("plays a whole hand with the human always following the bots", () => {
+    const runtime = soloTable();
+    runtime.start();
+    for (let step = 0; step < 60; step += 1) {
+      const view = runtime.view();
+      if (view === null || view.phase === "hand-over" || view.phase === "game-over") break;
+      if (view.turn !== 0) break;
+      const intent = chooseIntent(view);
+      if (intent === null) break;
+      const reason = runtime.submit(0, intent);
+      if (reason !== null) throw new Error(`${view.phase}: ${reason}`);
+    }
+    const view = runtime.view();
+    expect(view?.phase).toBe("hand-over");
+    expect(view?.lastHand).not.toBeNull();
+    expect((view?.score[0] ?? 0) + (view?.score[1] ?? 0)).toBeGreaterThan(0);
+  });
+
+  it("plays a whole game of bots against bots to a winner", () => {
+    const runtime = soloTable();
+    runtime.start();
+    for (let hand = 0; hand < 60; hand += 1) {
+      for (let step = 0; step < 60; step += 1) {
+        const view = runtime.view();
+        if (view === null || view.turn !== 0) break;
+        const intent = chooseIntent(view);
+        if (intent === null) break;
+        if (runtime.submit(0, intent) !== null) break;
+      }
+      const view = runtime.view();
+      if (view?.phase === "game-over") break;
+      if (view?.phase !== "hand-over") break;
+      runtime.submit(0, { type: "next-hand" });
+    }
+    const view = runtime.view();
+    expect(view?.phase).toBe("game-over");
+    expect(view?.winner).not.toBeNull();
+    expect(Math.max(view?.score[0] ?? 0, view?.score[1] ?? 0)).toBeGreaterThanOrEqual(10);
+  });
+
+  it("seats a late person in a bot's chair rather than turning them away", () => {
+    const sent: Sent[] = [];
+    const runtime = new HostRuntime({
+      tableName: "Kitchen",
+      hostName: "Sam",
+      holdsEverySeat: false,
+      seed: 99,
+      scheduleBotMove: (run) => run(),
+      onChange: () => {},
+    });
+    runtime.attach(fakeTransport(sent));
+    runtime.fillWithBots();
+    runtime.onPeerJoin("p1");
+    runtime.onMessage("p1", JSON.stringify({ t: "hello", name: "Ada" }));
+    const lobby = runtime.lobby();
+    expect(lobby.players[1]).toMatchObject({ name: "Ada", kind: "human" });
+    expect(lobby.players.filter((player) => player.kind === "bot")).toHaveLength(2);
   });
 });
