@@ -15,35 +15,41 @@ const MAX_CARD_WIDTH = 78;
 /** How far a playable card lifts out of the row. */
 const RAISE = 12;
 
+/** A card keeps the width of a full hand, so the row never resizes as it empties. */
+const HAND_SLOTS = 5;
+
 type HandRowProps = {
   hand: readonly Card[];
   trump: Suit | null;
   playable: readonly Card[];
   onPlay: ((card: Card) => void) | null;
+  /** Shown in place of the cards when the hand is empty. */
+  note?: string | null;
 };
 
-export const HandRow = ({ hand, trump, playable, onPlay }: HandRowProps) => {
+export const HandRow = ({ hand, trump, playable, onPlay, note = null }: HandRowProps) => {
   const { width } = useWindowDimensions();
-  if (hand.length === 0) {
-    return <Text style={styles.empty}>You sit this hand out.</Text>;
-  }
-  const spare = width - SIDE_PADDING - GAP * (hand.length - 1);
-  const box = cardBoxOfWidth(Math.min(MAX_CARD_WIDTH, Math.floor(spare / hand.length)));
+  const spare = width - SIDE_PADDING - GAP * (HAND_SLOTS - 1);
+  const box = cardBoxOfWidth(Math.min(MAX_CARD_WIDTH, Math.floor(spare / HAND_SLOTS)));
   return (
-    <View style={[styles.row, { minHeight: box.height + RAISE }]}>
-      {sortForHand(hand, trump).map((card) => {
-        const enabled = onPlay !== null && playable.includes(card);
-        return (
-          <CardView
-            key={card}
-            card={card}
-            box={box}
-            dimmed={onPlay !== null && !enabled}
-            raised={enabled}
-            onPress={enabled ? () => onPlay(card) : undefined}
-          />
-        );
-      })}
+    <View style={[styles.row, { height: box.height + RAISE }]}>
+      {hand.length === 0
+        ? note === null
+          ? null
+          : <Text style={styles.empty}>{note}</Text>
+        : sortForHand(hand, trump).map((card) => {
+            const enabled = onPlay !== null && playable.includes(card);
+            return (
+              <CardView
+                key={card}
+                card={card}
+                box={box}
+                dimmed={onPlay !== null && !enabled}
+                raised={enabled}
+                onPress={enabled ? () => onPlay(card) : undefined}
+              />
+            );
+          })}
     </View>
   );
 };
@@ -54,12 +60,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "flex-end",
     gap: GAP,
-    paddingTop: spacing.md,
   },
   empty: {
     ...typography.body,
     color: colors.inkMuted,
     textAlign: "center",
-    paddingVertical: spacing.xl,
+    alignSelf: "center",
   },
 });
