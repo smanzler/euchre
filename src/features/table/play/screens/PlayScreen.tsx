@@ -13,6 +13,7 @@ import { HandRow } from "../components/HandRow";
 import { HandoffGate } from "../components/HandoffGate";
 import { Scoreboard } from "../components/Scoreboard";
 import { TableFelt } from "../components/TableFelt";
+import { TableMenu } from "../components/TableMenu";
 import { panelFor } from "../lib/phasePanels";
 
 /** The felt and the hand keep their place, so only this band changes with the phase. */
@@ -30,9 +31,22 @@ export const PlayScreen = () => {
     router.dismissTo("/");
   };
 
+  /** Leaves the table open behind the menu. */
+  const toMenu = (): void => router.dismissTo("/");
+
+  const topBar = (
+    <View style={styles.topBar}>
+      <Text numberOfLines={1} style={styles.tableName}>
+        {table.lobby?.tableName ?? "Table"}
+      </Text>
+      <TableMenu onMenu={toMenu} onLeave={leave} />
+    </View>
+  );
+
   if (view === null) {
     return (
       <Screen>
+        {topBar}
         <Panel title="Waiting">
           <Text style={styles.note}>Waiting for the host to deal.</Text>
           <ActionButton label="Leave the table" tone="ghost" onPress={leave} />
@@ -45,6 +59,7 @@ export const PlayScreen = () => {
   if (sharedDevice && revealed !== view.seat) {
     return (
       <Screen>
+        {topBar}
         <HandoffGate name={names[view.seat]} onReveal={() => setRevealed(view.seat)} />
       </Screen>
     );
@@ -65,6 +80,7 @@ export const PlayScreen = () => {
 
   return (
     <Screen>
+      {topBar}
       <Scoreboard view={view} names={names} />
       <TableFelt view={view} names={names} />
 
@@ -102,6 +118,8 @@ export const PlayScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  topBar: { flexDirection: "row", alignItems: "center", gap: spacing.md },
+  tableName: { ...typography.heading, color: colors.ink, flex: 1 },
   action: { height: ACTION_HEIGHT },
   actionBody: {
     flexGrow: 1,
