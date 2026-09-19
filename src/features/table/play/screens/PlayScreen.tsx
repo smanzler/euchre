@@ -57,6 +57,8 @@ export const PlayScreen = () => {
   const cardIntent = panel.cardIntent;
   const Controls = panel.Controls;
 
+  const status = panel.status(view, names);
+
   const send = (intent: PlayerIntent): void => {
     tableStore.submit(view.seat, intent);
   };
@@ -68,7 +70,7 @@ export const PlayScreen = () => {
 
       <View style={styles.action}>
         <ScrollView contentContainerStyle={styles.actionBody}>
-          <Text style={styles.statusText}>{panel.status(view, names)}</Text>
+          {status === null ? null : <Text style={styles.statusText}>{status}</Text>}
           {table.error === null ? null : (
             <Text style={styles.error} onPress={() => tableStore.clearError()}>
               {table.error}

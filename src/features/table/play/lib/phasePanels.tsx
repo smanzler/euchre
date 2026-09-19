@@ -5,7 +5,6 @@ import {
   type Suit,
   rankLabel,
   rankOf,
-  suitName,
   suitSymbol,
 } from "@/features/euchre/lib/cards";
 import { type Phase, type Seat, type Team } from "@/features/euchre/lib/types";
@@ -14,6 +13,7 @@ import { TEAM_NAMES } from "@/features/table/lib/seats";
 import type { PlayerIntent } from "@/features/table/transport/lib/protocol";
 import { ActionButton } from "@/components/ActionButton";
 import { spacing } from "@/lib/theme";
+import { HandSummary } from "../components/HandSummary";
 import { SuitButton } from "../components/SuitButton";
 
 export type SeatNames = Record<Seat, string>;
@@ -25,8 +25,8 @@ export type PhaseControlsProps = {
 };
 
 export type PhasePanel = {
-  /** What the table is waiting for, for every seat to read. */
-  status(view: PlayerView, names: SeatNames): string;
+  /** What the table is waiting for, or null when the controls say it. */
+  status(view: PlayerView, names: SeatNames): string | null;
   /** Buttons for the seat on turn, or null when the hand is the only control. */
   Controls: ComponentType<PhaseControlsProps> | null;
   /** What tapping a card means, or null when cards are not tappable. */
@@ -106,24 +106,16 @@ const CallTrumpControls = ({ view, onIntent }: PhaseControlsProps) => {
   );
 };
 
-const HandOverControls = ({ onIntent }: PhaseControlsProps) => (
+const HandOverControls = ({ view, names, onIntent }: PhaseControlsProps) => (
   <View style={styles.panel}>
-    <Row>
-      <ActionButton label="Deal the next hand" onPress={() => onIntent({ type: "next-hand" })} />
-    </Row>
+    {view.lastHand === null ? null : <HandSummary result={view.lastHand} names={names} />}
+    <ActionButton
+      compact
+      label="Deal the next hand"
+      onPress={() => onIntent({ type: "next-hand" })}
+    />
   </View>
 );
-
-const handResultText = (view: PlayerView, names: SeatNames): string => {
-  const result = view.lastHand;
-  if (result === null) return "The hand is over.";
-  const maker = names[result.maker];
-  const team = TEAM_NAMES[result.scoringTeam as Team];
-  const alone = result.alone ? " alone" : "";
-  return result.euchred
-    ? `${maker} was euchred in ${suitName(result.trump)}${alone}. ${team} take ${result.points}.`
-    : `${maker} made ${suitName(result.trump)}${alone} with ${result.makerTricks} tricks. ${team} take ${result.points}.`;
-};
 
 const phasePanels: Record<Phase, PhasePanel> = {
   "bidding-up": {
@@ -156,7 +148,7 @@ const phasePanels: Record<Phase, PhasePanel> = {
     playable: (view) => view.legalPlays,
   },
   "hand-over": {
-    status: handResultText,
+    status: () => null,
     Controls: HandOverControls,
     cardIntent: null,
     actableOffTurn: true,
@@ -179,6 +171,6 @@ const phasePanels: Record<Phase, PhasePanel> = {
 export const panelFor = (phase: Phase): PhasePanel => phasePanels[phase];
 
 const styles = StyleSheet.create({
-  panel: { gap: spacing.sm, alignItems: "center" },
+  panel: { gap: spacing.sm, alignItems: "center", alignSelf: "stretch" },
   row: { flexDirection: "row", gap: spacing.sm, flexWrap: "wrap", justifyContent: "center" },
 });
