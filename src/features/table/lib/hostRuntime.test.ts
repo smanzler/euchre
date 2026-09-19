@@ -1,4 +1,3 @@
-import type { Seat } from "@/features/euchre/lib/types";
 import { parseHostMessage } from "../transport/lib/protocol";
 import type { PeerId, Transport } from "../transport/lib/types";
 import { chooseIntent } from "../bots/lib/policy";

@@ -1,4 +1,4 @@
-import type { Card, Suit } from "@/features/euchre/lib/cards";
+import type { Card } from "@/features/euchre/lib/cards";
 import { effectiveSuit, legalPlays } from "@/features/euchre/lib/trick";
 import { DEFAULT_RULES } from "@/features/euchre/lib/types";
 import type { PlayerView } from "@/features/euchre/lib/view";
