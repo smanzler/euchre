@@ -2,7 +2,7 @@ import { Platform } from "react-native";
 import type { Device, Subscription } from "react-native-ble-plx";
 import { DEFAULT_CHUNK_BYTES, createAssembler, createFramer } from "../../lib/protocol";
 import type { OpenOptions, Transport, TransportDriver } from "../../lib/types";
-import { getBleManager } from "./bleManager";
+import { getBleManager, waitForBluetooth } from "./bleManager";
 import {
   ATT_OVERHEAD_BYTES,
   EUCHRE_SERVICE_UUID,
@@ -35,6 +35,12 @@ const openClient = async (options: OpenOptions): Promise<Transport> => {
   if (!(await requestScanPermissions())) {
     listener.onStatus("error", "Bluetooth permission was refused.");
     throw new Error("Bluetooth permission was refused.");
+  }
+
+  const blocked = await waitForBluetooth();
+  if (blocked !== null) {
+    listener.onStatus("error", blocked);
+    throw new Error(blocked);
   }
 
   const manager = getBleManager();

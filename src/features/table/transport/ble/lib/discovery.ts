@@ -1,5 +1,5 @@
 import { fromBase64, utf8Decode } from "../../lib/bytes";
-import { getBleManager } from "./bleManager";
+import { getBleManager, waitForBluetooth } from "./bleManager";
 import { EUCHRE_SERVICE_UUID } from "./constants";
 import { requestScanPermissions } from "./permissions";
 
@@ -46,6 +46,11 @@ export const scanForTables = (handlers: ScanHandlers): (() => void) => {
   void (async () => {
     if (!(await requestScanPermissions())) {
       handlers.onError("Bluetooth permission was refused.");
+      return;
+    }
+    const blocked = await waitForBluetooth();
+    if (blocked !== null) {
+      handlers.onError(blocked);
       return;
     }
     if (stopped) return;

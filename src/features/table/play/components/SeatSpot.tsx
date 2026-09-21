@@ -4,6 +4,7 @@ import { colors, radius, spacing, typography } from "@/lib/theme";
 import { CardView } from "./CardView";
 import { DealerChip } from "./DealerChip";
 import { MakerTag } from "./MakerTag";
+import { type Point, TrickCard, type TrickSweep } from "./TrickCard";
 
 /** Enough of a card back to read the count without taking a seat's width. */
 const BACK_OVERLAP = -22;
@@ -12,6 +13,9 @@ type SeatSpotProps = {
   name: string;
   cardsHeld: number;
   played: Card | null;
+  /** Where the played card goes once the trick ends, and null until then. */
+  sweep: TrickSweep | null;
+  onCardAnchor: (point: Point) => void;
   onTurn: boolean;
   wonTrick: boolean;
   sittingOut: boolean;
@@ -26,6 +30,8 @@ export const SeatSpot = ({
   name,
   cardsHeld,
   played,
+  sweep,
+  onCardAnchor,
   onTurn,
   wonTrick,
   sittingOut,
@@ -40,7 +46,12 @@ export const SeatSpot = ({
     </View>
     {called === null ? null : <MakerTag trump={called.trump} alone={called.alone} />}
     {played !== null ? (
-      <CardView card={played} size="lg" dimmed={!wonTrick && sittingOut} />
+      <TrickCard
+        card={played}
+        dimmed={!wonTrick && sittingOut}
+        sweep={sweep}
+        onAnchor={onCardAnchor}
+      />
     ) : sittingOut ? (
       <View style={styles.empty}>
         <Text style={styles.emptyText}>out</Text>
@@ -60,7 +71,8 @@ export const SeatSpot = ({
 );
 
 const styles = StyleSheet.create({
-  spot: { alignItems: "center", gap: spacing.xs, minHeight: 112 },
+  // The cards cross the middle of the felt, so keep a seat above the label.
+  spot: { alignItems: "center", gap: spacing.xs, minHeight: 112, zIndex: 1 },
   label: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
   name: { ...typography.label, color: colors.inkDim },
   onTurn: { color: colors.accent },
