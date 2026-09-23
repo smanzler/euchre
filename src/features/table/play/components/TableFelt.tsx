@@ -4,6 +4,15 @@ import type { PlayerView } from "@/features/euchre/lib/view";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 import { CardView } from "./CardView";
 import { SeatSpot } from "./SeatSpot";
+import type { SweepDirection } from "./SweptCard";
+
+/** Keyed by seats clockwise from the device seat, which sits at the bottom. */
+const towardSeat: Record<Seat, SweepDirection> = {
+  0: { x: 0, y: 1 },
+  1: { x: -1, y: 0 },
+  2: { x: 0, y: -1 },
+  3: { x: 1, y: 0 },
+};
 
 type TableFeltProps = {
   view: PlayerView;
@@ -48,6 +57,7 @@ export const TableFelt = ({ view, names }: TableFeltProps) => {
         played={played.get(seat) ?? null}
         onTurn={settled === null && view.turn === seat}
         wonTrick={settled !== null && settled.winner === seat}
+        sweep={settled === null ? null : towardSeat[((settled.winner - view.seat + 4) % 4) as Seat]}
         sittingOut={view.sittingOut === seat}
         isDealer={view.dealer === seat}
         tricks={view.trump === null ? null : view.tricksBySeat[seat]}

@@ -4,6 +4,7 @@ import { colors, radius, spacing, typography } from "@/lib/theme";
 import { CardView } from "./CardView";
 import { DealerChip } from "./DealerChip";
 import { MakerTag } from "./MakerTag";
+import { type SweepDirection, SweptCard } from "./SweptCard";
 
 /** Enough of a card back to read the count without taking a seat's width. */
 const BACK_OVERLAP = -22;
@@ -14,6 +15,7 @@ type SeatSpotProps = {
   played: Card | null;
   onTurn: boolean;
   wonTrick: boolean;
+  sweep: SweepDirection | null;
   sittingOut: boolean;
   isDealer: boolean;
   /** Tricks the seat took this hand; null hides the count. */
@@ -30,6 +32,7 @@ export const SeatSpot = ({
   played,
   onTurn,
   wonTrick,
+  sweep,
   sittingOut,
   isDealer,
   tricks,
@@ -48,7 +51,7 @@ export const SeatSpot = ({
     </View>
     {called === null ? null : <MakerTag trump={called.trump} alone={called.alone} />}
     {played !== null ? (
-      <CardView card={played} size="lg" dimmed={!wonTrick && sittingOut} />
+      <SweptCard key={played} card={played} dimmed={!wonTrick && sittingOut} sweep={sweep} />
     ) : sittingOut ? (
       <View style={styles.empty}>
         <Text style={styles.emptyText}>out</Text>
