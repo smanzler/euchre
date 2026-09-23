@@ -63,8 +63,13 @@ export const LobbyScreen = () => {
             onAddBot={table.mode === "hosting" ? tableStore.addBot : undefined}
             onRemoveBot={table.mode === "hosting" ? tableStore.removeBot : undefined}
             onRename={table.mode === "hosting" ? tableStore.renameSeat : undefined}
+            onSwap={table.mode === "hosting" ? tableStore.swapSeats : undefined}
             renamable={table.renamableSeats}
+            swappable={table.swappableSeats}
           />
+        )}
+        {table.swappableSeats.length === 0 ? null : (
+          <Text style={styles.note}>Move a player to another seat to change the teams.</Text>
         )}
       </Panel>
 

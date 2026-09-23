@@ -1,11 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
-import {
-  TEAMS,
-  type Seat,
-  type Team,
-  seatsOfTeam,
-} from "@/features/euchre/lib/types";
+import { TEAMS, type Seat, type Team } from "@/features/euchre/lib/types";
 import type { PlayerView } from "@/features/euchre/lib/view";
+import { teamNameOf } from "@/features/table/lib/seats";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 import { TrumpBadge } from "./TrumpBadge";
 
@@ -44,9 +40,7 @@ const TeamColumn = ({
   return (
     <View style={[styles.team, mine && styles.mine]}>
       <Text numberOfLines={1} style={styles.teamName}>
-        {seatsOfTeam(team)
-          .map((seat) => names[seat])
-          .join(" / ")}
+        {teamNameOf(team, names)}
       </Text>
       <Text style={styles.score}>{points}</Text>
       <View style={styles.track}>

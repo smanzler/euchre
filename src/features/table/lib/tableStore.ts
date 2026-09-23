@@ -27,6 +27,8 @@ export type TableSnapshot = {
   controlledSeats: readonly Seat[];
   /** The seats this device may name. */
   renamableSeats: readonly Seat[];
+  /** The seats this device may move a player between. */
+  swappableSeats: readonly Seat[];
   canStart: boolean;
   started: boolean;
 };
@@ -42,6 +44,7 @@ const IDLE: TableSnapshot = {
   seat: null,
   controlledSeats: [],
   renamableSeats: [],
+  swappableSeats: [],
   canStart: false,
   started: false,
 };
@@ -91,6 +94,7 @@ const rebuild = (): void => {
       seat: host.activeLocalSeat(),
       controlledSeats: host.localSeats(),
       renamableSeats: host.renamableSeats(),
+      swappableSeats: host.swappableSeats(),
       canStart: lobby.canStart,
       started: host.started,
     };
@@ -107,6 +111,7 @@ const rebuild = (): void => {
       seat: client.seat,
       controlledSeats: client.seat === null ? [] : [client.seat],
       renamableSeats: [],
+      swappableSeats: [],
       canStart: false,
       started: view !== null,
     };
@@ -238,6 +243,10 @@ export const tableStore = {
 
   renameSeat(seat: Seat, name: string): void {
     host?.renameSeat(seat, name);
+  },
+
+  swapSeats(from: Seat, to: Seat): void {
+    host?.swapSeats(from, to);
   },
 
   submit(seat: Seat, intent: PlayerIntent): void {

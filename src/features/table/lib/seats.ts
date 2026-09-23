@@ -1,4 +1,4 @@
-import type { Seat } from "@/features/euchre/lib/types";
+import { type Seat, type Team, seatsOfTeam } from "@/features/euchre/lib/types";
 
 export const SEAT_NAMES: Record<Seat, string> = {
   0: "South",
@@ -7,4 +7,10 @@ export const SEAT_NAMES: Record<Seat, string> = {
   3: "East",
 };
 
-export const TEAM_NAMES = ["South / North", "West / East"] as const;
+export const TEAM_LABELS = ["Team 1", "Team 2"] as const;
+
+/** The two seats of a team, by the names the table gives them. */
+export const teamNameOf = (team: Team, names: Record<Seat, string>): string =>
+  seatsOfTeam(team)
+    .map((seat) => names[seat])
+    .join(" / ");

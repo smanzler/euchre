@@ -9,7 +9,7 @@ import {
 } from "@/features/euchre/lib/cards";
 import { type Phase, type Seat, type Team } from "@/features/euchre/lib/types";
 import type { PlayerView } from "@/features/euchre/lib/view";
-import { TEAM_NAMES } from "@/features/table/lib/seats";
+import { teamNameOf } from "@/features/table/lib/seats";
 import type { PlayerIntent } from "@/features/table/transport/lib/protocol";
 import { ActionButton } from "@/components/ActionButton";
 import { spacing } from "@/lib/theme";
@@ -155,10 +155,10 @@ const phasePanels: Record<Phase, PhasePanel> = {
     playable: noCards,
   },
   "game-over": {
-    status: (view) =>
+    status: (view, names) =>
       view.winner === null
         ? "The game is over."
-        : `${TEAM_NAMES[view.winner]} win ${view.score[view.winner]}–${
+        : `${teamNameOf(view.winner, names)} win ${view.score[view.winner]}–${
             view.score[(1 - view.winner) as Team]
           }`,
     Controls: null,
