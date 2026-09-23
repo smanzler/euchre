@@ -50,6 +50,7 @@ export const TableFelt = ({ view, names }: TableFeltProps) => {
         wonTrick={settled !== null && settled.winner === seat}
         sittingOut={view.sittingOut === seat}
         isDealer={view.dealer === seat}
+        tricks={view.trump === null ? null : view.tricksBySeat[seat]}
         called={
           view.maker === seat && view.trump !== null
             ? { trump: view.trump, alone: view.aloneSeat === seat }

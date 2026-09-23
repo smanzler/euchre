@@ -16,6 +16,8 @@ type SeatSpotProps = {
   wonTrick: boolean;
   sittingOut: boolean;
   isDealer: boolean;
+  /** Tricks the seat took this hand; null hides the count. */
+  tricks: number | null;
   /** Set on the seat that named trump. */
   called: { trump: Suit; alone: boolean } | null;
   /** The seat the device belongs to holds its cards in the hand row. */
@@ -30,12 +32,18 @@ export const SeatSpot = ({
   wonTrick,
   sittingOut,
   isDealer,
+  tricks,
   called,
   hideBacks = false,
 }: SeatSpotProps) => (
   <View style={styles.spot}>
     <View style={styles.label}>
       <Text style={[styles.name, onTurn && styles.onTurn, wonTrick && styles.winner]}>{name}</Text>
+      {tricks === null ? null : (
+        <View style={[styles.tricks, tricks > 0 && styles.tricksTaken]}>
+          <Text style={[styles.tricksText, tricks > 0 && styles.tricksTakenText]}>{tricks}</Text>
+        </View>
+      )}
       {isDealer ? <DealerChip /> : null}
     </View>
     {called === null ? null : <MakerTag trump={called.trump} alone={called.alone} />}
@@ -65,6 +73,18 @@ const styles = StyleSheet.create({
   name: { ...typography.label, color: colors.inkDim },
   onTurn: { color: colors.accent },
   winner: { color: colors.good },
+  tricks: {
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: spacing.xs,
+    borderRadius: radius.pill,
+    backgroundColor: colors.feltDeep,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tricksTaken: { backgroundColor: colors.good },
+  tricksText: { ...typography.label, fontSize: 11, letterSpacing: 0, color: colors.inkDim },
+  tricksTakenText: { color: colors.feltDeep },
   backs: { flexDirection: "row", height: 48, alignItems: "center" },
   overlap: { marginLeft: BACK_OVERLAP },
   empty: {

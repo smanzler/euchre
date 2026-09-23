@@ -31,6 +31,7 @@ export type PlayerView = {
   trick: readonly TrickPlay<Seat>[];
   lastTrick: CompletedTrick | null;
   tricksWon: Record<Team, number>;
+  tricksBySeat: Record<Seat, number>;
   score: Record<Team, number>;
   lastHand: HandResult | null;
   winner: Team | null;
@@ -42,9 +43,11 @@ export const viewFor = (state: GameState, seat: Seat): PlayerView => {
   const handSizes = {} as Record<Seat, number>;
   for (const other of SEATS) handSizes[other] = state.hands[other].length;
   const tricksWon: Record<Team, number> = { 0: 0, 1: 0 };
+  const tricksBySeat: Record<Seat, number> = { 0: 0, 1: 0, 2: 0, 3: 0 };
   for (const trick of state.completed) {
     const team = (trick.winner % 2) as Team;
     tricksWon[team] += 1;
+    tricksBySeat[trick.winner] += 1;
   }
   return {
     seat,
@@ -63,6 +66,7 @@ export const viewFor = (state: GameState, seat: Seat): PlayerView => {
     trick: state.trick,
     lastTrick: state.completed[state.completed.length - 1] ?? null,
     tricksWon,
+    tricksBySeat,
     score: state.score,
     lastHand: state.lastHand,
     winner: state.winner,

@@ -22,6 +22,7 @@ const viewWith = (over: Partial<PlayerView>): PlayerView => {
     trick: [],
     lastTrick: null,
     tricksWon: { 0: 0, 1: 0 },
+    tricksBySeat: { 0: 0, 1: 0, 2: 0, 3: 0 },
     score: { 0: 0, 1: 0 },
     lastHand: null,
     winner: null,
