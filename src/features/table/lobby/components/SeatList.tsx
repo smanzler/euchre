@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import type { Seat } from "@/features/euchre/lib/types";
-import { SEAT_NAMES } from "@/features/table/lib/seats";
-import type { LobbySnapshot, SeatKind } from "@/features/table/transport/lib/protocol";
+import { TEAMS, type Seat, type Team, seatsOfTeam } from "@/features/euchre/lib/types";
+import { seatNamesOf } from "@/features/table/hooks/useTable";
+import { SEAT_NAMES, TEAM_LABELS, teamNameOf } from "@/features/table/lib/seats";
+import type { LobbySnapshot, PlayerSlot, SeatKind } from "@/features/table/transport/lib/protocol";
 import { ActionButton } from "@/components/ActionButton";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 
@@ -14,6 +16,60 @@ const KIND_TAGS: Record<SeatKind, string> = {
 
 const MAX_NAME = 16;
 
+type SeatActionsProps = {
+  player: PlayerSlot;
+  /** The seat waiting for a partner to swap with, or null when none is picked. */
+  moving: Seat | null;
+  canMove: boolean;
+  onAddBot?: (seat: Seat) => void;
+  onRemoveBot?: (seat: Seat) => void;
+  onPick: () => void;
+  onDrop: () => void;
+};
+
+const SeatActions = ({
+  player,
+  moving,
+  canMove,
+  onAddBot,
+  onRemoveBot,
+  onPick,
+  onDrop,
+}: SeatActionsProps) => {
+  if (moving === player.seat)
+    return <ActionButton label="Cancel" tone="ghost" compact onPress={onDrop} />;
+  if (moving !== null)
+    return canMove ? (
+      <ActionButton label="Swap here" tone="secondary" compact onPress={onDrop} />
+    ) : null;
+  return (
+    <>
+      {player.kind === "bot" && onRemoveBot !== undefined ? (
+        <ActionButton
+          label="Remove"
+          tone="ghost"
+          compact
+          onPress={() => onRemoveBot(player.seat)}
+        />
+      ) : null}
+      {player.kind !== "bot" &&
+      player.kind !== "host" &&
+      !player.connected &&
+      onAddBot !== undefined ? (
+        <ActionButton
+          label="Add bot"
+          tone="secondary"
+          compact
+          onPress={() => onAddBot(player.seat)}
+        />
+      ) : null}
+      {canMove && player.kind !== "open" ? (
+        <ActionButton label="Move" tone="ghost" compact onPress={onPick} />
+      ) : null}
+    </>
+  );
+};
+
 type SeatListProps = {
   lobby: LobbySnapshot;
   mySeat: Seat | null;
@@ -21,8 +77,11 @@ type SeatListProps = {
   onAddBot?: (seat: Seat) => void;
   onRemoveBot?: (seat: Seat) => void;
   onRename?: (seat: Seat, name: string) => void;
+  onSwap?: (from: Seat, to: Seat) => void;
   /** The seats `onRename` accepts. */
   renamable?: readonly Seat[];
+  /** The seats `onSwap` accepts. */
+  swappable?: readonly Seat[];
 };
 
 export const SeatList = ({
@@ -31,61 +90,80 @@ export const SeatList = ({
   onAddBot,
   onRemoveBot,
   onRename,
+  onSwap,
   renamable = [],
-}: SeatListProps) => (
-  <View style={styles.list}>
-    {lobby.players.map((player) => {
-      const canRename = onRename !== undefined && renamable.includes(player.seat);
-      return (
-        <View key={player.seat} style={[styles.row, player.seat === mySeat && styles.mine]}>
-          <View style={[styles.dot, player.connected && styles.dotOn]} />
-          {canRename ? (
-            <TextInput
-              style={[styles.name, styles.nameInput]}
-              value={player.name}
-              onChangeText={(next) => onRename(player.seat, next)}
-              onEndEditing={(event) => {
-                if (event.nativeEvent.text.trim() === "")
-                  onRename(player.seat, SEAT_NAMES[player.seat]);
-              }}
-              selectTextOnFocus
-              maxLength={MAX_NAME}
-            />
-          ) : (
-            <Text style={styles.name}>{player.name}</Text>
-          )}
-          <Text style={styles.tag}>
-            {[KIND_TAGS[player.kind], player.seat === mySeat ? "you" : null]
-              .filter((tag) => tag !== null)
-              .join(" · ")}
-          </Text>
-          {player.kind === "bot" && onRemoveBot !== undefined ? (
-            <ActionButton
-              label="Remove"
-              tone="ghost"
-              compact
-              onPress={() => onRemoveBot(player.seat)}
-            />
-          ) : null}
-          {player.kind !== "bot" &&
-          player.kind !== "host" &&
-          !player.connected &&
-          onAddBot !== undefined ? (
-            <ActionButton
-              label="Add bot"
-              tone="secondary"
-              compact
-              onPress={() => onAddBot(player.seat)}
-            />
-          ) : null}
+  swappable = [],
+}: SeatListProps) => {
+  const [moving, setMoving] = useState<Seat | null>(null);
+  const names = seatNamesOf(lobby);
+
+  const drop = (seat: Seat): void => {
+    if (moving !== null && moving !== seat) onSwap?.(moving, seat);
+    setMoving(null);
+  };
+
+  return (
+    <View style={styles.teams}>
+      {TEAMS.map((team: Team) => (
+        <View key={team} style={styles.team}>
+          <View style={styles.teamHead}>
+            <Text style={styles.teamLabel}>{TEAM_LABELS[team]}</Text>
+            <Text numberOfLines={1} style={styles.teamNames}>
+              {teamNameOf(team, names)}
+            </Text>
+          </View>
+          {seatsOfTeam(team).map((seat) => {
+            const player = lobby.players.find((slot) => slot.seat === seat);
+            if (player === undefined) return null;
+            return (
+              <View
+                key={seat}
+                style={[styles.row, seat === mySeat && styles.mine, seat === moving && styles.moving]}
+              >
+                <View style={[styles.dot, player.connected && styles.dotOn]} />
+                {onRename !== undefined && renamable.includes(seat) ? (
+                  <TextInput
+                    style={[styles.name, styles.nameInput]}
+                    value={player.name}
+                    onChangeText={(next) => onRename(seat, next)}
+                    onEndEditing={(event) => {
+                      if (event.nativeEvent.text.trim() === "") onRename(seat, SEAT_NAMES[seat]);
+                    }}
+                    selectTextOnFocus
+                    maxLength={MAX_NAME}
+                  />
+                ) : (
+                  <Text style={styles.name}>{player.name}</Text>
+                )}
+                <Text style={styles.tag}>
+                  {[KIND_TAGS[player.kind], seat === mySeat ? "you" : null]
+                    .filter((tag) => tag !== null)
+                    .join(" · ")}
+                </Text>
+                <SeatActions
+                  player={player}
+                  moving={moving}
+                  canMove={onSwap !== undefined && swappable.includes(seat)}
+                  onAddBot={onAddBot}
+                  onRemoveBot={onRemoveBot}
+                  onPick={() => setMoving(seat)}
+                  onDrop={() => drop(seat)}
+                />
+              </View>
+            );
+          })}
         </View>
-      );
-    })}
-  </View>
-);
+      ))}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  list: { gap: spacing.sm },
+  teams: { gap: spacing.lg },
+  team: { gap: spacing.sm },
+  teamHead: { flexDirection: "row", alignItems: "baseline", gap: spacing.sm },
+  teamLabel: { ...typography.label, color: colors.accent, fontSize: 10 },
+  teamNames: { ...typography.label, color: colors.inkDim, fontSize: 10, flex: 1 },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -98,6 +176,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   mine: { borderColor: colors.accent },
+  moving: { borderColor: colors.good, borderStyle: "dashed" },
   dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.inkDim },
   dotOn: { backgroundColor: colors.good },
   name: { ...typography.body, color: colors.ink, flex: 1 },

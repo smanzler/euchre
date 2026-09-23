@@ -107,6 +107,61 @@ describe("HostRuntime lobby", () => {
     expect(runtime.lobby().players[0]?.name).toBe("Sam");
   });
 
+  it("swaps two players, which puts them on the other team", () => {
+    const { runtime } = hostedTable();
+    seatThree(runtime);
+    runtime.swapSeats(1, 2);
+    expect(runtime.lobby().players.map((player) => player.name)).toEqual([
+      "Sam",
+      "Bo",
+      "Ada",
+      "Cy",
+    ]);
+  });
+
+  it("tells each moved peer its new seat", () => {
+    const { runtime, sent } = hostedTable();
+    seatThree(runtime);
+    runtime.swapSeats(1, 2);
+    const toAda = lastTo(sent, "p1");
+    if (toAda?.t !== "lobby") throw new Error("expected a lobby");
+    expect(toAda.seat).toBe(2);
+  });
+
+  it("moves the host with its seat", () => {
+    const { runtime } = hostedTable();
+    seatThree(runtime);
+    runtime.swapSeats(0, 3);
+    const lobby = runtime.lobby();
+    expect(lobby.players[3]).toMatchObject({ name: "Sam", kind: "host" });
+    expect(lobby.players[0]).toMatchObject({ name: "Cy", kind: "human" });
+    expect(runtime.renamableSeats()).toEqual([3]);
+  });
+
+  it("moves a player into an open seat", () => {
+    const { runtime } = hostedTable();
+    runtime.onPeerJoin("p1");
+    runtime.onMessage("p1", JSON.stringify({ t: "hello", name: "Ada" }));
+    runtime.swapSeats(1, 3);
+    const lobby = runtime.lobby();
+    expect(lobby.players[3]).toMatchObject({ name: "Ada", kind: "human" });
+    expect(lobby.players[1]).toMatchObject({ kind: "open", connected: false });
+  });
+
+  it("holds the seating once the game is under way", () => {
+    const { runtime } = hostedTable();
+    seatThree(runtime);
+    runtime.start();
+    runtime.swapSeats(1, 2);
+    expect(runtime.swappableSeats()).toEqual([]);
+    expect(runtime.lobby().players.map((player) => player.name)).toEqual([
+      "Sam",
+      "Ada",
+      "Bo",
+      "Cy",
+    ]);
+  });
+
   it("refuses to start before the table is full", () => {
     const { runtime } = hostedTable();
     runtime.start();
@@ -234,6 +289,16 @@ describe("HostRuntime bots", () => {
     const runtime = soloTable();
     runtime.addBot(0);
     expect(runtime.lobby().players[0]?.kind).toBe("host");
+  });
+
+  it("keeps a bot out of the seat the host moved to", () => {
+    const runtime = soloTable();
+    runtime.swapSeats(0, 2);
+    runtime.addBot(2);
+    const lobby = runtime.lobby();
+    expect(lobby.players[2]).toMatchObject({ name: "Sam", kind: "host" });
+    expect(lobby.players[0]?.kind).toBe("bot");
+    expect(runtime.localSeats()).toEqual([2]);
   });
 
   it("runs the bots up to the human's turn as soon as the hand opens", () => {

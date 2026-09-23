@@ -18,6 +18,7 @@ import {
 import type { PeerId, Transport } from "../transport/lib/types";
 import { SEAT_NAMES } from "./seats";
 
+/** The seat the host takes when the table opens. The host may move before the start. */
 export const HOST_SEAT: Seat = 0;
 
 /** Long enough to read the move a bot just made. */
@@ -48,14 +49,15 @@ const emptySeats = (): Record<Seat, Occupant | null> => ({ 0: null, 1: null, 2: 
 export class HostRuntime {
   private transport: Transport | null = null;
   private seats = emptySeats();
+  private hostSeat: Seat = HOST_SEAT;
   private state: GameState | null = null;
   private botMoveQueued = false;
 
   constructor(private readonly options: HostRuntimeOptions) {
-    this.seats[HOST_SEAT] = { kind: "local", name: options.hostName };
+    this.seats[this.hostSeat] = { kind: "local", name: options.hostName };
     if (!options.holdsEverySeat) return;
     for (const seat of SEATS) {
-      if (seat === HOST_SEAT) continue;
+      if (seat === this.hostSeat) continue;
       this.seats[seat] = { kind: "local", name: SEAT_NAMES[seat] };
     }
   }
@@ -77,7 +79,7 @@ export class HostRuntime {
     const local = this.localSeats();
     const turn = this.state?.turn;
     if (turn !== undefined && local.includes(turn)) return turn;
-    return local[0] ?? HOST_SEAT;
+    return local[0] ?? this.hostSeat;
   }
 
   /** The seats whose name the host sets. A remote player keeps the name it sent. */
@@ -96,9 +98,27 @@ export class HostRuntime {
     this.publish();
   }
 
+  /** The seats the host may move. Seating is fixed once the game runs. */
+  swappableSeats(): Seat[] {
+    return this.started ? [] : [...SEATS];
+  }
+
+  /** Puts each seat's player in the other seat, which also changes the teams. */
+  swapSeats(from: Seat, to: Seat): void {
+    if (this.started || from === to) return;
+    const moved = this.seats[from];
+    const replaced = this.seats[to];
+    if (moved === null && replaced === null) return;
+    this.seats[from] = replaced;
+    this.seats[to] = moved;
+    if (this.hostSeat === from) this.hostSeat = to;
+    else if (this.hostSeat === to) this.hostSeat = from;
+    this.publish();
+  }
+
   /** Gives a seat to a bot. The host always keeps its own seat. */
   addBot(seat: Seat): void {
-    if (this.started || seat === HOST_SEAT) return;
+    if (this.started || seat === this.hostSeat) return;
     const occupant = this.seats[seat];
     if (occupant?.kind === "remote" && occupant.connected) return;
     this.seats[seat] = { kind: "bot", name: `${SEAT_NAMES[seat]} bot` };
@@ -116,7 +136,7 @@ export class HostRuntime {
   fillWithBots(): void {
     if (this.started) return;
     for (const seat of SEATS) {
-      if (seat === HOST_SEAT) continue;
+      if (seat === this.hostSeat) continue;
       if (isConnected(this.seats[seat]) && this.seats[seat]?.kind === "remote") continue;
       this.seats[seat] = { kind: "bot", name: `${SEAT_NAMES[seat]} bot` };
     }
@@ -127,7 +147,7 @@ export class HostRuntime {
     const players: PlayerSlot[] = SEATS.map((seat) => {
       const occupant = this.seats[seat];
       const kind: SeatKind =
-        seat === HOST_SEAT
+        seat === this.hostSeat
           ? "host"
           : occupant === null
             ? "open"
@@ -155,14 +175,18 @@ export class HostRuntime {
 
   start(): void {
     if (this.started || !this.lobby().canStart) return;
-    this.state = newGame({ rules: this.options.rules, seed: this.options.seed, dealer: HOST_SEAT });
+    this.state = newGame({
+      rules: this.options.rules,
+      seed: this.options.seed,
+      dealer: this.hostSeat,
+    });
     this.publish();
   }
 
   /** Deals a fresh game to the same table. */
   restart(): void {
     if (!this.started) return;
-    this.state = newGame({ rules: this.options.rules, dealer: HOST_SEAT });
+    this.state = newGame({ rules: this.options.rules, dealer: this.hostSeat });
     this.publish();
   }
 
