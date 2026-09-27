@@ -1,0 +1,17 @@
+{
+  "name": "@euchre/game",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "lint": "eslint src --max-warnings=0",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.9"
+  }
+}

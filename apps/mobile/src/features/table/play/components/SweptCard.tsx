@@ -7,7 +7,7 @@ import Animated, {
   withDelay,
   withTiming,
 } from "react-native-reanimated";
-import type { Card } from "@/features/euchre/lib/cards";
+import type { Card } from "@euchre/game/rules/cards";
 import { CardView } from "./CardView";
 
 // Keep hold plus sweep below the bot move delay, so a bot lead does not cut the sweep.

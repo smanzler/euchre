@@ -4,8 +4,8 @@ import {
   type Seat,
   type Team,
   seatsOfTeam,
-} from "@/features/euchre/lib/types";
-import type { PlayerView } from "@/features/euchre/lib/view";
+} from "@euchre/game/rules/types";
+import type { PlayerView } from "@euchre/game/rules/view";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 import { TrumpBadge } from "./TrumpBadge";
 

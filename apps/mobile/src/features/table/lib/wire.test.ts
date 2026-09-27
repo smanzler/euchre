@@ -1,15 +1,15 @@
-import type { Card } from "@/features/euchre/lib/cards";
-import type { Phase } from "@/features/euchre/lib/types";
-import type { PlayerView } from "@/features/euchre/lib/view";
-import { createAssembler, createFramer } from "../transport/lib/protocol";
-import type { PlayerIntent } from "../transport/lib/protocol";
+import type { Card } from "@euchre/game/rules/cards";
+import type { Phase } from "@euchre/game/rules/types";
+import type { PlayerView } from "@euchre/game/rules/view";
+import { createAssembler, createFramer } from "../transport/lib/framing";
+import type { PlayerIntent } from "@euchre/game/protocol/messages";
 import type {
   PeerId,
   Transport,
   TransportListener,
 } from "../transport/lib/types";
 import { ClientRuntime } from "./clientRuntime";
-import { HostRuntime } from "./hostRuntime";
+import { HostRuntime } from "@euchre/game/host/hostRuntime";
 
 /**
  * A host and its clients joined by the real framer, so a test covers the

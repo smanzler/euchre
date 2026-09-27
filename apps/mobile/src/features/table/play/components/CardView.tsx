@@ -6,7 +6,7 @@ import {
   rankOf,
   suitOf,
   suitSymbol,
-} from "@/features/euchre/lib/cards";
+} from "@euchre/game/rules/cards";
 import { colors, radius } from "@/lib/theme";
 
 export const CARD_SIZES = ["sm", "md", "lg"] as const;

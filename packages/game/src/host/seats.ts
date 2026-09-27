@@ -1,4 +1,4 @@
-import type { Seat } from "@/features/euchre/lib/types";
+import type { Seat } from "../rules/types";
 
 export const SEAT_NAMES: Record<Seat, string> = {
   0: "South",

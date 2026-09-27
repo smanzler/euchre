@@ -1,12 +1,11 @@
-import { parseHostMessage } from "../transport/lib/protocol";
-import type { PeerId, Transport } from "../transport/lib/types";
-import { chooseIntent } from "../bots/lib/policy";
+import { parseHostMessage } from "../protocol/messages";
+import type { PeerId, Transport } from "./transport";
+import { chooseIntent } from "../bots/policy";
 import { HostRuntime } from "./hostRuntime";
 
 type Sent = { peer: PeerId; text: string };
 
 const fakeTransport = (sent: Sent[]): Transport => ({
-  kind: "ble-host",
   async send(peer, text) {
     sent.push({ peer, text });
   },

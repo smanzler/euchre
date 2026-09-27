@@ -4,7 +4,7 @@ import {
   colorOf,
   suitName,
   suitSymbol,
-} from "@/features/euchre/lib/cards";
+} from "@euchre/game/rules/cards";
 import { colors, radius } from "@/lib/theme";
 
 const SIZE = 60;

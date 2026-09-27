@@ -5,7 +5,7 @@ import {
   type Framer,
   createAssembler,
   createFramer,
-} from "../../lib/protocol";
+} from "../../lib/framing";
 import type {
   OpenOptions,
   PeerId,

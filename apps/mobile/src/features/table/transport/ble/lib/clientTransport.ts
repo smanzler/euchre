@@ -4,7 +4,7 @@ import {
   DEFAULT_CHUNK_BYTES,
   createAssembler,
   createFramer,
-} from "../../lib/protocol";
+} from "../../lib/framing";
 import type { OpenOptions, Transport, TransportDriver } from "../../lib/types";
 import { getBleManager, waitForBluetooth } from "./bleManager";
 import {

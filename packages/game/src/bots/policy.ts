@@ -1,12 +1,8 @@
-import { type Card, type Suit, suitOf } from "@/features/euchre/lib/cards";
-import {
-  cardStrength,
-  effectiveSuit,
-  isTrump,
-} from "@/features/euchre/lib/trick";
-import { type Phase, type Seat, partnerOf } from "@/features/euchre/lib/types";
-import type { PlayerView } from "@/features/euchre/lib/view";
-import type { PlayerIntent } from "../../transport/lib/protocol";
+import { type Card, type Suit, suitOf } from "../rules/cards";
+import { cardStrength, effectiveSuit, isTrump } from "../rules/trick";
+import { type Phase, type Seat, partnerOf } from "../rules/types";
+import type { PlayerView } from "../rules/view";
+import type { PlayerIntent } from "../protocol/messages";
 import {
   TRICK,
   bestFive,
