@@ -8,6 +8,8 @@ import {
 import { type PlayerView, viewFor } from "../rules/view";
 import { chooseIntent } from "../bots/policy";
 import {
+  type ClientMessage,
+  type HostCommand,
   type LobbySnapshot,
   type PlayerIntent,
   type PlayerSlot,
@@ -28,12 +30,24 @@ type Occupant =
   | { kind: "bot"; name: string }
   | { kind: "remote"; peer: PeerId; name: string; connected: boolean };
 
+/** A remote host is a peer that sends the lobby commands. */
+export type HostSeat =
+  | { kind: "local"; name: string }
+  | { kind: "remote"; peer: PeerId; name: string };
+
+type MessageHandlers = {
+  [T in ClientMessage["t"]]: (
+    peer: PeerId,
+    message: Extract<ClientMessage, { t: T }>,
+  ) => void;
+};
+
 const isConnected = (occupant: Occupant | null): boolean =>
   occupant !== null && (occupant.kind !== "remote" || occupant.connected);
 
 export type HostRuntimeOptions = {
   tableName: string;
-  hostName: string;
+  host: HostSeat;
   /** Pass and play. The host device plays every seat it has not given to a bot. */
   holdsEverySeat: boolean;
   rules?: Partial<GameRules>;
@@ -57,7 +71,9 @@ export class HostRuntime {
   private botMoveQueued = false;
 
   constructor(private readonly options: HostRuntimeOptions) {
-    this.seats[HOST_SEAT] = { kind: "local", name: options.hostName };
+    const { host } = options;
+    this.seats[HOST_SEAT] =
+      host.kind === "local" ? host : { ...host, connected: true };
     if (!options.holdsEverySeat) return;
     for (const seat of SEATS) {
       if (seat === HOST_SEAT) continue;
@@ -204,18 +220,52 @@ export class HostRuntime {
   onMessage(peer: PeerId, text: string): void {
     const message = parseClientMessage(text);
     if (message === null) return;
-    if (message.t === "hello") {
-      this.seatPeer(peer, message.name);
-      return;
-    }
-    const seat = this.seatOf(peer);
-    if (seat === null) {
-      void this.sendTo(peer, { t: "rejected", reason: "you are not seated" });
-      return;
-    }
-    const reason = this.submit(seat, message.intent);
-    if (reason !== null) void this.sendTo(peer, { t: "rejected", reason });
+    const handle = this.handlers[message.t] as (
+      peer: PeerId,
+      message: ClientMessage,
+    ) => void;
+    handle(peer, message);
   }
+
+  private readonly hostCommands: {
+    [T in HostCommand["t"]]: (message: Extract<HostCommand, { t: T }>) => void;
+  } = {
+    "add-bot": ({ seat }) => this.addBot(seat),
+    "remove-bot": ({ seat }) => this.removeBot(seat),
+    rename: ({ seat, name }) => this.renameSeat(seat, name),
+    start: () => this.start(),
+    restart: () => this.restart(),
+  };
+
+  private runHostCommand(peer: PeerId, command: HostCommand): void {
+    if (this.seatOf(peer) !== HOST_SEAT) {
+      void this.sendTo(peer, {
+        t: "rejected",
+        reason: "only the host can do that",
+      });
+      return;
+    }
+    const run = this.hostCommands[command.t] as (command: HostCommand) => void;
+    run(command);
+  }
+
+  private readonly handlers: MessageHandlers = {
+    hello: (peer, { name }) => this.seatPeer(peer, name),
+    intent: (peer, { intent }) => {
+      const seat = this.seatOf(peer);
+      if (seat === null) {
+        void this.sendTo(peer, { t: "rejected", reason: "you are not seated" });
+        return;
+      }
+      const reason = this.submit(seat, intent);
+      if (reason !== null) void this.sendTo(peer, { t: "rejected", reason });
+    },
+    "add-bot": (peer, command) => this.runHostCommand(peer, command),
+    "remove-bot": (peer, command) => this.runHostCommand(peer, command),
+    rename: (peer, command) => this.runHostCommand(peer, command),
+    start: (peer, command) => this.runHostCommand(peer, command),
+    restart: (peer, command) => this.runHostCommand(peer, command),
+  };
 
   private seatOf(peer: PeerId): Seat | null {
     return (
@@ -234,11 +284,13 @@ export class HostRuntime {
       return;
     }
     // A person takes an open seat first, and a bot's seat only if none is open.
+    // Only the host sits in the host seat.
+    const guests = SEATS.filter((seat) => seat !== HOST_SEAT);
     const free =
-      SEATS.find((seat) => this.seats[seat] === null) ??
+      guests.find((seat) => this.seats[seat] === null) ??
       (this.started
         ? undefined
-        : SEATS.find((seat) => this.seats[seat]?.kind === "bot"));
+        : guests.find((seat) => this.seats[seat]?.kind === "bot"));
     if (free === undefined) {
       void this.sendTo(peer, { t: "rejected", reason: "the table is full" });
       return;

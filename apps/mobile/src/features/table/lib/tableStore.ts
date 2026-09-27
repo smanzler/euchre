@@ -170,7 +170,7 @@ export const tableStore = {
     error = null;
     const runtime = new HostRuntime({
       tableName: options.tableName,
-      hostName: options.displayName,
+      host: { kind: "local", name: options.displayName },
       holdsEverySeat: transportDrivers[options.kind].holdsEverySeat,
       rules: options.rules,
       seed: options.seed,

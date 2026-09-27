@@ -101,6 +101,7 @@ packages/game/src/
 packages/server/src/
   health/                  GET /health
   peers/                   GET /ws, and a Transport over its sockets
+  tables/                  the tables in memory, by join code
 ```
 
 `apps/mobile/src/features/table/transport/lib/registry.ts` maps a transport kind to a
@@ -108,10 +109,23 @@ driver. A new way to carry messages is one more driver and one more entry.
 
 ## The server
 
-`packages/server` (`@euchre/server`) is the start of online play. It will
-run the host runtime for each table, so every phone joins as a client.
-For now it serves `/health`, and `/ws` gives each socket a peer id and
-carries text both ways. It does not seat players yet.
+`packages/server` (`@euchre/server`) runs the host runtime for each online
+table, so every phone joins as a client and no phone holds another hand.
+
+A phone opens `/ws` and sends one of these first:
+
+- `{ t: "create", tableName, name }` makes a table. The phone takes the
+  host seat and sends the lobby commands: `add-bot`, `remove-bot`,
+  `rename`, `start` and `restart`.
+- `{ t: "join", code }` joins the table with that four letter code.
+
+The server answers `{ t: "table", code }`. From then on the phone speaks
+the same messages as a Bluetooth client, starting with `hello`. The server
+checks every field of a client message, because it does not trust a phone.
+
+The lobby closes when the host leaves before the deal. A started game
+keeps the seat of a player who drops, and the table goes when the last
+player leaves. Tables live in memory, so a restart removes them.
 
 ```sh
 cp packages/server/.env.example packages/server/.env
