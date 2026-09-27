@@ -16,7 +16,6 @@ import {
   ATT_OVERHEAD_BYTES,
   EUCHRE_SERVICE_UUID,
   FROM_HOST_CHARACTERISTIC_UUID,
-  MAX_TABLE_NAME_BYTES,
   TO_HOST_CHARACTERISTIC_UUID,
 } from "./constants";
 import {
@@ -25,6 +24,7 @@ import {
   peripheralUnavailableReason,
 } from "./peripheral";
 import { requestAdvertisePermissions } from "./permissions";
+import { trimTableName } from "./tableName";
 
 type HostPeer = {
   framer: Framer;
@@ -35,14 +35,6 @@ type HostPeer = {
 
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
-
-/** The advertised name must fit in the 31 byte advertising packet. */
-export const trimTableName = (name: string): string => {
-  const trimmed = name.trim();
-  return trimmed.length > MAX_TABLE_NAME_BYTES
-    ? trimmed.slice(0, MAX_TABLE_NAME_BYTES)
-    : trimmed;
-};
 
 const openHost = async (options: OpenOptions): Promise<Transport> => {
   const { listener } = options;
