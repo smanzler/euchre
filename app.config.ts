@@ -48,6 +48,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           "Euchre uses Bluetooth to find and join nearby tables.",
       },
     ],
+    "expo-sqlite",
     "./plugins/withReleaseSigning",
   ],
   experiments: {
