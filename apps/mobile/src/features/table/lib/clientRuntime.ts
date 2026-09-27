@@ -1,6 +1,7 @@
 import type { Seat } from "@euchre/game/rules/types";
 import type { PlayerView } from "@euchre/game/rules/view";
 import {
+  type HostCommand,
   type LobbySnapshot,
   type PlayerIntent,
   parseHostMessage,
@@ -74,5 +75,10 @@ export class ClientRuntime {
 
   submit(intent: PlayerIntent): void {
     void this.transport?.broadcast(JSON.stringify({ t: "intent", intent }));
+  }
+
+  /** The host refuses a command unless this client holds the host seat. */
+  command(command: HostCommand): void {
+    void this.transport?.broadcast(JSON.stringify(command));
   }
 }

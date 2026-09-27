@@ -28,6 +28,7 @@ const createWire = (hostListener: TransportListener): Wire => {
 
   const host: Transport = {
     kind: "ble-host",
+    tableCode: null,
     async send(peer, text) {
       const deliver = toClient.get(peer);
       if (deliver === undefined) return;
@@ -73,6 +74,7 @@ const createWire = (hostListener: TransportListener): Wire => {
       };
       return {
         kind: "ble-client",
+        tableCode: null,
         send,
         broadcast: (text) => send("host", text),
         async stop() {
@@ -234,5 +236,33 @@ describe("host and clients over a framed wire", () => {
     expect(hostRuntime.lobby().players[1]?.name).toBe("Ada");
     void transport.stop();
     expect(hostRuntime.lobby().players[1]?.name).toBe("Open seat");
+  });
+
+  it("lets the client in the host seat run a remote table", () => {
+    const hostRuntime = new HostRuntime({
+      tableName: "Online",
+      host: { kind: "remote", peer: "owner", name: "Sam" },
+      holdsEverySeat: false,
+      seed: 7,
+      scheduleBotMove: () => {},
+      onChange: () => {},
+    });
+    const wire = createWire(listenAsHost(hostRuntime));
+    hostRuntime.attach(wire.host);
+    const owner = new ClientRuntime({ displayName: "Sam", onChange: () => {} });
+    owner.attach(wire.join("owner", listenAsClient(owner)));
+    const guest = new ClientRuntime({ displayName: "Ada", onChange: () => {} });
+    guest.attach(wire.join("p1", listenAsClient(guest)));
+
+    expect(owner.seat).toBe(0);
+    guest.command({ t: "add-bot", seat: 2 });
+    expect(guest.lastRejection).toBe("only the host can do that");
+
+    owner.command({ t: "add-bot", seat: 2 });
+    owner.command({ t: "add-bot", seat: 3 });
+    expect(owner.lobby?.canStart).toBe(true);
+    owner.command({ t: "start" });
+    expect(owner.view?.hand).toHaveLength(5);
+    expect(guest.view?.hand).toHaveLength(5);
   });
 });

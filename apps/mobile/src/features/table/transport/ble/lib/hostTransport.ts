@@ -128,6 +128,7 @@ const openHost = async (options: OpenOptions): Promise<Transport> => {
 
   return {
     kind: "ble-host",
+    tableCode: null,
     send,
     async broadcast(text) {
       await Promise.all([...peers.keys()].map((peerId) => send(peerId, text)));

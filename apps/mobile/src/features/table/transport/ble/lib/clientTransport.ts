@@ -117,6 +117,7 @@ const openClient = async (options: OpenOptions): Promise<Transport> => {
 
     return {
       kind: "ble-client",
+      tableCode: null,
       send,
       broadcast: (text) => send(HOST_PEER, text),
       async stop() {

@@ -55,6 +55,9 @@ export const LobbyScreen = () => {
           {STATUS_TEXT[table.status]}
           {table.statusDetail === null ? "" : ` — ${table.statusDetail}`}
         </Text>
+        {table.code === null ? null : (
+          <Text style={styles.code}>Code {table.code}</Text>
+        )}
       </View>
 
       <Panel title="Seats">
@@ -64,19 +67,15 @@ export const LobbyScreen = () => {
           <SeatList
             lobby={lobby}
             mySeat={table.seat}
-            onAddBot={table.mode === "hosting" ? tableStore.addBot : undefined}
-            onRemoveBot={
-              table.mode === "hosting" ? tableStore.removeBot : undefined
-            }
-            onRename={
-              table.mode === "hosting" ? tableStore.renameSeat : undefined
-            }
+            onAddBot={table.controlsLobby ? tableStore.addBot : undefined}
+            onRemoveBot={table.controlsLobby ? tableStore.removeBot : undefined}
+            onRename={table.controlsLobby ? tableStore.renameSeat : undefined}
             renamable={table.renamableSeats}
           />
         )}
       </Panel>
 
-      {table.mode === "hosting" ? (
+      {table.controlsLobby ? (
         <Panel title="Start">
           <Text style={styles.note}>
             {table.canStart
@@ -109,6 +108,7 @@ const styles = StyleSheet.create({
   header: { gap: spacing.xs, paddingTop: spacing.md },
   title: { ...typography.title, color: colors.ink },
   subtitle: { ...typography.body, color: colors.inkMuted },
+  code: { ...typography.title, color: colors.accent, letterSpacing: 4 },
   note: { ...typography.body, color: colors.inkMuted },
   error: { ...typography.body, color: colors.danger },
 });

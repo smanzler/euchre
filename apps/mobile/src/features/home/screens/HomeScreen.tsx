@@ -6,6 +6,7 @@ import { Panel } from "@/components/Panel";
 import { Screen } from "@/components/Screen";
 import { useTable } from "@/features/table/hooks/useTable";
 import { tableStore } from "@/features/table/lib/tableStore";
+import { TABLE_CODE_LENGTH } from "@euchre/game/protocol/tables";
 import { profileStore, useDisplayName } from "@/lib/profile";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 
@@ -14,20 +15,19 @@ export const HomeScreen = () => {
   const displayName = useDisplayName();
   const table = useTable();
   const [tableName, setTableName] = useState("Kitchen table");
+  const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const bleHost = tableStore.driverFor("ble-host");
   const hostBlocked = bleHost.unavailableReason();
+  const onlineBlocked = tableStore.driverFor("online").unavailableReason();
 
-  const open = async (
-    kind: "local" | "ble-host",
-    fillWithBots = false,
-  ): Promise<void> => {
+  const enter = async (opening: () => Promise<void>): Promise<void> => {
     setBusy(true);
     setError(null);
     try {
-      await tableStore.host({ kind, tableName, displayName, fillWithBots });
+      await opening();
       router.push("/lobby");
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : String(caught));
@@ -35,6 +35,11 @@ export const HomeScreen = () => {
       setBusy(false);
     }
   };
+
+  const open = (kind: "local" | "ble-host", fillWithBots = false) =>
+    enter(() =>
+      tableStore.host({ kind, tableName, displayName, fillWithBots }),
+    );
 
   return (
     <Screen scroll>
@@ -91,6 +96,16 @@ export const HomeScreen = () => {
           <Text style={styles.note}>{hostBlocked}</Text>
         )}
         <ActionButton
+          label="Host online"
+          disabled={busy || onlineBlocked !== null}
+          onPress={() =>
+            void enter(() => tableStore.hostOnline({ tableName, displayName }))
+          }
+        />
+        {onlineBlocked === null ? null : (
+          <Text style={styles.note}>{onlineBlocked}</Text>
+        )}
+        <ActionButton
           label="Pass and play on this device"
           tone="secondary"
           disabled={busy}
@@ -113,6 +128,26 @@ export const HomeScreen = () => {
           tone="secondary"
           disabled={busy}
           onPress={() => router.push("/join")}
+        />
+        <TextInput
+          style={styles.input}
+          value={code}
+          onChangeText={(next) => setCode(next.toUpperCase())}
+          placeholder="Table code"
+          placeholderTextColor={colors.inkDim}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          maxLength={TABLE_CODE_LENGTH}
+        />
+        <ActionButton
+          label="Join online"
+          tone="secondary"
+          disabled={
+            busy || onlineBlocked !== null || code.length !== TABLE_CODE_LENGTH
+          }
+          onPress={() =>
+            void enter(() => tableStore.joinOnline({ code, displayName }))
+          }
         />
       </Panel>
 
