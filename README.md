@@ -19,6 +19,13 @@ pnpm ios                   # or: pnpm android
 
 `pnpm start` then reloads JavaScript into the installed dev client.
 
+A release build on Android is signed with the upload key named by
+`EUCHRE_UPLOAD_STORE_FILE`, `EUCHRE_UPLOAD_STORE_PASSWORD`,
+`EUCHRE_UPLOAD_KEY_ALIAS` and `EUCHRE_UPLOAD_KEY_PASSWORD`. Set them in
+`~/.gradle/gradle.properties`, or as `ORG_GRADLE_PROJECT_*` env vars.
+Without them the release build is unsigned; see
+`plugins/withReleaseSigning.ts`.
+
 You do not need a second device to try the game: **Play against bots**
 runs a full four handed game on one device with no radio at all.
 
