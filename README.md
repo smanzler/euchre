@@ -13,8 +13,8 @@ development client once, then iterate with Metro:
 
 ```sh
 pnpm install
-npx expo prebuild          # writes ios/ and android/
-pnpm ios                   # or: pnpm android
+pnpm --filter @euchre/mobile prebuild   # writes apps/mobile/ios and android
+pnpm ios                                # or: pnpm android
 ```
 
 `pnpm start` then reloads JavaScript into the installed dev client.
@@ -24,7 +24,7 @@ A release build on Android is signed with the upload key named by
 `EUCHRE_UPLOAD_KEY_ALIAS` and `EUCHRE_UPLOAD_KEY_PASSWORD`. Set them in
 `~/.gradle/gradle.properties`, or as `ORG_GRADLE_PROJECT_*` env vars.
 Without them the release build is unsigned; see
-`plugins/withReleaseSigning.ts`.
+`apps/mobile/plugins/withReleaseSigning.ts`.
 
 You do not need a second device to try the game: **Play against bots**
 runs a full four handed game on one device with no radio at all.
@@ -50,7 +50,7 @@ memory, so it is gone once the app stops.
 ## Bots
 
 A bot is a pure function from the view a seat is allowed to see to the
-move it makes, in `src/features/table/bots/lib/`. It counts a hand in
+move it makes, in `apps/mobile/src/features/table/bots/lib/`. It counts a hand in
 hundredths of a trick, so a threshold never lands on a floating point
 edge: bowers, trump, off suit aces and a void with trump to ruff. It
 orders up at about three tricks and goes alone near five. In play it
@@ -74,30 +74,37 @@ to ten wins.
 
 ## Layout
 
+This is a pnpm workspace. The app is `apps/mobile` (`@euchre/mobile`), and
+`packages/` holds code that two or more apps use. `pnpm lint`,
+`pnpm typecheck` and `pnpm test` run in every workspace. `pnpm check` runs
+Prettier on the whole repo.
+
 ```
-app/                     routes; each one re-exports a screen
-src/features/
-  euchre/lib/            the rules, with no react and no io
-  table/
-    lib/                 host and client runtimes, and the store the ui reads
-    bots/lib/            hand values and the move a bot makes
-    lobby/, play/        the screens and their parts
-    transport/
-      lib/               the driver interface, the registry and the wire format
-      local/, ble/       one driver each
-  home/
-src/components/, src/lib/
-modules/euchre-ble-peripheral/
+apps/mobile/
+  app/                     routes; each one re-exports a screen
+  src/features/
+    euchre/lib/            the rules, with no react and no io
+    table/
+      lib/                 host and client runtimes, and the store the ui reads
+      bots/lib/            hand values and the move a bot makes
+      lobby/, play/        the screens and their parts
+      transport/
+        lib/               the driver interface, the registry and the wire format
+        local/, ble/       one driver each
+    home/
+  src/components/, src/lib/
+  modules/euchre-ble-peripheral/
+packages/                  code that two or more apps use
 ```
 
-`src/features/table/transport/lib/registry.ts` maps a transport kind to a
+`apps/mobile/src/features/table/transport/lib/registry.ts` maps a transport kind to a
 driver. A new way to carry messages is one more driver and one more entry.
 
 ## The Bluetooth host
 
 `react-native-ble-plx` only speaks the central role, so it can join a table
 but cannot be one. The host side is a local Expo module,
-`modules/euchre-ble-peripheral`, that runs a GATT server:
+`apps/mobile/modules/euchre-ble-peripheral`, that runs a GATT server:
 `CBPeripheralManager` on iOS and `BluetoothGattServer` on Android. It
 advertises one service with two characteristics, one that clients write to
 and one that notifies them. Messages are JSON, cut into base64 frames that

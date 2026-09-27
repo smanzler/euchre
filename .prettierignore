@@ -1,2 +1,6 @@
 # deps
 pnpm-lock.yaml
+
+# generated native folders
+apps/mobile/ios
+apps/mobile/android
