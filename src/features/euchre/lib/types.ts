@@ -13,7 +13,10 @@ export const otherTeam = (team: Team): Team => (1 - team) as Team;
 
 export const partnerOf = (seat: Seat): Seat => ((seat + 2) % 4) as Seat;
 
-export const seatsOfTeam = (team: Team): readonly Seat[] => [team as Seat, partnerOf(team as Seat)];
+export const seatsOfTeam = (team: Team): readonly Seat[] => [
+  team as Seat,
+  partnerOf(team as Seat),
+];
 
 export const nextSeat = (seat: Seat): Seat => ((seat + 1) % 4) as Seat;
 
@@ -36,7 +39,10 @@ export type GameRules = {
   stickTheDealer: boolean;
 };
 
-export const DEFAULT_RULES: GameRules = { pointsToWin: 10, stickTheDealer: true };
+export const DEFAULT_RULES: GameRules = {
+  pointsToWin: 10,
+  stickTheDealer: true,
+};
 
 export type CompletedTrick = {
   plays: readonly TrickPlay<Seat>[];

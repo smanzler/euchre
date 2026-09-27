@@ -41,17 +41,36 @@ export const SeatSpot = ({
 }: SeatSpotProps) => (
   <View style={styles.spot}>
     <View style={styles.label}>
-      <Text style={[styles.name, onTurn && styles.onTurn, wonTrick && styles.winner]}>{name}</Text>
+      <Text
+        style={[
+          styles.name,
+          onTurn && styles.onTurn,
+          wonTrick && styles.winner,
+        ]}
+      >
+        {name}
+      </Text>
       {tricks === null ? null : (
         <View style={[styles.tricks, tricks > 0 && styles.tricksTaken]}>
-          <Text style={[styles.tricksText, tricks > 0 && styles.tricksTakenText]}>{tricks}</Text>
+          <Text
+            style={[styles.tricksText, tricks > 0 && styles.tricksTakenText]}
+          >
+            {tricks}
+          </Text>
         </View>
       )}
       {isDealer ? <DealerChip /> : null}
     </View>
-    {called === null ? null : <MakerTag trump={called.trump} alone={called.alone} />}
+    {called === null ? null : (
+      <MakerTag trump={called.trump} alone={called.alone} />
+    )}
     {played !== null ? (
-      <SweptCard key={played} card={played} dimmed={!wonTrick && sittingOut} sweep={sweep} />
+      <SweptCard
+        key={played}
+        card={played}
+        dimmed={!wonTrick && sittingOut}
+        sweep={sweep}
+      />
     ) : sittingOut ? (
       <View style={styles.empty}>
         <Text style={styles.emptyText}>out</Text>
@@ -86,7 +105,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   tricksTaken: { backgroundColor: colors.good },
-  tricksText: { ...typography.label, fontSize: 11, letterSpacing: 0, color: colors.inkDim },
+  tricksText: {
+    ...typography.label,
+    fontSize: 11,
+    letterSpacing: 0,
+    color: colors.inkDim,
+  },
   tricksTakenText: { color: colors.feltDeep },
   backs: { flexDirection: "row", height: 48, alignItems: "center" },
   overlap: { marginLeft: BACK_OVERLAP },

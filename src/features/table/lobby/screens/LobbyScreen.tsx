@@ -35,7 +35,11 @@ export const LobbyScreen = () => {
       <Screen>
         <Panel title="No table">
           <Text style={styles.note}>This table is closed.</Text>
-          <ActionButton label="Back" tone="secondary" onPress={() => router.dismissTo("/")} />
+          <ActionButton
+            label="Back"
+            tone="secondary"
+            onPress={() => router.dismissTo("/")}
+          />
         </Panel>
       </Screen>
     );
@@ -61,8 +65,12 @@ export const LobbyScreen = () => {
             lobby={lobby}
             mySeat={table.seat}
             onAddBot={table.mode === "hosting" ? tableStore.addBot : undefined}
-            onRemoveBot={table.mode === "hosting" ? tableStore.removeBot : undefined}
-            onRename={table.mode === "hosting" ? tableStore.renameSeat : undefined}
+            onRemoveBot={
+              table.mode === "hosting" ? tableStore.removeBot : undefined
+            }
+            onRename={
+              table.mode === "hosting" ? tableStore.renameSeat : undefined
+            }
             renamable={table.renamableSeats}
           />
         )}
@@ -83,11 +91,15 @@ export const LobbyScreen = () => {
         </Panel>
       ) : (
         <Panel title="Waiting">
-          <Text style={styles.note}>The host starts the game when the table is full.</Text>
+          <Text style={styles.note}>
+            The host starts the game when the table is full.
+          </Text>
         </Panel>
       )}
 
-      {table.error === null ? null : <Text style={styles.error}>{table.error}</Text>}
+      {table.error === null ? null : (
+        <Text style={styles.error}>{table.error}</Text>
+      )}
       <ActionButton label="Leave the table" tone="ghost" onPress={leave} />
     </Screen>
   );

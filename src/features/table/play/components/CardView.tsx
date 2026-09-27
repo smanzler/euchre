@@ -1,11 +1,23 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { type Card, colorOf, rankLabel, rankOf, suitOf, suitSymbol } from "@/features/euchre/lib/cards";
+import {
+  type Card,
+  colorOf,
+  rankLabel,
+  rankOf,
+  suitOf,
+  suitSymbol,
+} from "@/features/euchre/lib/cards";
 import { colors, radius } from "@/lib/theme";
 
 export const CARD_SIZES = ["sm", "md", "lg"] as const;
 export type CardSize = (typeof CARD_SIZES)[number];
 
-export type CardBox = { width: number; height: number; rank: number; pip: number };
+export type CardBox = {
+  width: number;
+  height: number;
+  rank: number;
+  pip: number;
+};
 
 const sizes: Record<CardSize, CardBox> = {
   sm: { width: 34, height: 48, rank: 12, pip: 14 },
@@ -47,7 +59,13 @@ export const CardView = ({
   const label = `${rankLabel(rankOf(card))} of ${suit}`;
 
   const body = faceDown ? (
-    <View style={[styles.face, styles.back, { width: box.width, height: box.height }]}>
+    <View
+      style={[
+        styles.face,
+        styles.back,
+        { width: box.width, height: box.height },
+      ]}
+    >
       <View style={styles.backPattern} />
     </View>
   ) : (
@@ -55,17 +73,25 @@ export const CardView = ({
       <Text style={[styles.rank, { fontSize: box.rank, color: ink }]}>
         {rankLabel(rankOf(card))}
       </Text>
-      <Text style={[styles.pip, { fontSize: box.pip, color: ink }]}>{suitSymbol(suit)}</Text>
+      <Text style={[styles.pip, { fontSize: box.pip, color: ink }]}>
+        {suitSymbol(suit)}
+      </Text>
     </View>
   );
 
   const shell = (
-    <View style={[dimmed && styles.dimmed, raised && styles.raised]}>{body}</View>
+    <View style={[dimmed && styles.dimmed, raised && styles.raised]}>
+      {body}
+    </View>
   );
 
   if (onPress === undefined) return shell;
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+    >
       {shell}
     </Pressable>
   );
@@ -81,7 +107,11 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     justifyContent: "space-between",
   },
-  back: { backgroundColor: colors.cardBack, borderColor: colors.feltDeep, padding: 4 },
+  back: {
+    backgroundColor: colors.cardBack,
+    borderColor: colors.feltDeep,
+    padding: 4,
+  },
   backPattern: {
     flex: 1,
     borderRadius: 3,

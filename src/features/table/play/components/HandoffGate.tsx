@@ -16,7 +16,12 @@ export const HandoffGate = ({ name, onReveal }: HandoffGateProps) => (
 );
 
 const styles = StyleSheet.create({
-  gate: { flex: 1, alignItems: "center", justifyContent: "center", gap: spacing.lg },
+  gate: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.lg,
+  },
   label: { ...typography.label, color: colors.inkMuted },
   name: { ...typography.title, color: colors.accent },
 });

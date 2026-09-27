@@ -3,7 +3,8 @@ export type TransportKind = (typeof TRANSPORT_KINDS)[number];
 
 export type PeerId = string;
 
-export type TransportStatus = "idle" | "starting" | "ready" | "stopped" | "error";
+export type TransportStatus =
+  "idle" | "starting" | "ready" | "stopped" | "error";
 
 export type TransportListener = {
   onPeerJoin(peer: PeerId): void;

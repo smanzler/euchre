@@ -1,5 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
-import { type Suit, colorOf, suitName, suitSymbol } from "@/features/euchre/lib/cards";
+import {
+  type Suit,
+  colorOf,
+  suitName,
+  suitSymbol,
+} from "@/features/euchre/lib/cards";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 
 const SYMBOL_SIZE = 20;
@@ -19,7 +24,9 @@ export const TrumpBadge = ({ trump }: TrumpBadgeProps) => {
   return (
     <View style={[styles.face, { borderColor: ink }]}>
       <Text style={[styles.symbol, { color: ink }]}>{suitSymbol(trump)}</Text>
-      <Text style={[styles.name, { color: ink }]}>{suitName(trump).toUpperCase()}</Text>
+      <Text style={[styles.name, { color: ink }]}>
+        {suitName(trump).toUpperCase()}
+      </Text>
     </View>
   );
 };

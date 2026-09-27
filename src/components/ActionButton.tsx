@@ -1,7 +1,12 @@
 import { Pressable, StyleSheet, Text, type ViewStyle } from "react-native";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 
-export const BUTTON_TONES = ["primary", "secondary", "ghost", "danger"] as const;
+export const BUTTON_TONES = [
+  "primary",
+  "secondary",
+  "ghost",
+  "danger",
+] as const;
 export type ButtonTone = (typeof BUTTON_TONES)[number];
 
 type ToneStyle = { box: ViewStyle; ink: string };
@@ -9,7 +14,11 @@ type ToneStyle = { box: ViewStyle; ink: string };
 const tones: Record<ButtonTone, ToneStyle> = {
   primary: { box: { backgroundColor: colors.accent }, ink: colors.accentInk },
   secondary: {
-    box: { backgroundColor: colors.surfaceRaised, borderWidth: 1, borderColor: colors.border },
+    box: {
+      backgroundColor: colors.surfaceRaised,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
     ink: colors.ink,
   },
   ghost: { box: { backgroundColor: "transparent" }, ink: colors.inkMuted },

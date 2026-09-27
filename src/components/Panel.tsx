@@ -9,7 +9,9 @@ type PanelProps = {
 
 export const Panel = ({ title, children }: PanelProps) => (
   <View style={styles.panel}>
-    {title === undefined ? null : <Text style={styles.title}>{title.toUpperCase()}</Text>}
+    {title === undefined ? null : (
+      <Text style={styles.title}>{title.toUpperCase()}</Text>
+    )}
     {children}
   </View>
 );

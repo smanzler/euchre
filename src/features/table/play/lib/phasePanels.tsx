@@ -45,7 +45,13 @@ const Row = ({ children }: { children: React.ReactNode }) => (
   <View style={styles.row}>{children}</View>
 );
 
-const AloneToggle = ({ alone, onChange }: { alone: boolean; onChange: (next: boolean) => void }) => (
+const AloneToggle = ({
+  alone,
+  onChange,
+}: {
+  alone: boolean;
+  onChange: (next: boolean) => void;
+}) => (
   <ActionButton
     label={alone ? "Going alone ✓" : "Go alone"}
     tone={alone ? "primary" : "secondary"}
@@ -108,7 +114,9 @@ const CallTrumpControls = ({ view, onIntent }: PhaseControlsProps) => {
 
 const HandOverControls = ({ view, names, onIntent }: PhaseControlsProps) => (
   <View style={styles.panel}>
-    {view.lastHand === null ? null : <HandSummary result={view.lastHand} names={names} />}
+    {view.lastHand === null ? null : (
+      <HandSummary result={view.lastHand} names={names} />
+    )}
     <ActionButton
       compact
       label="Deal the next hand"
@@ -172,5 +180,10 @@ export const panelFor = (phase: Phase): PhasePanel => phasePanels[phase];
 
 const styles = StyleSheet.create({
   panel: { gap: spacing.sm, alignItems: "center", alignSelf: "stretch" },
-  row: { flexDirection: "row", gap: spacing.sm, flexWrap: "wrap", justifyContent: "center" },
+  row: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
 });

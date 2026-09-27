@@ -1,4 +1,5 @@
-const BASE64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+const BASE64_ALPHABET =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 const BASE64_VALUES = new Map<string, number>(
   [...BASE64_ALPHABET].map((character, index) => [character, index]),
@@ -20,7 +21,11 @@ export const utf8Encode = (text: string): Uint8Array => {
     } else if (code < 0x800) {
       out.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
     } else if (code < 0x10000) {
-      out.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+      out.push(
+        0xe0 | (code >> 12),
+        0x80 | ((code >> 6) & 0x3f),
+        0x80 | (code & 0x3f),
+      );
     } else {
       out.push(
         0xf0 | (code >> 18),
@@ -59,7 +64,10 @@ export const utf8Decode = (bytes: Uint8Array): string => {
     i += width;
     if (code > 0xffff) {
       const rest = code - 0x10000;
-      out += String.fromCharCode(0xd800 + (rest >> 10), 0xdc00 + (rest & 0x3ff));
+      out += String.fromCharCode(
+        0xd800 + (rest >> 10),
+        0xdc00 + (rest & 0x3ff),
+      );
     } else {
       out += String.fromCharCode(code);
     }
@@ -75,7 +83,10 @@ export const toBase64 = (bytes: Uint8Array): string => {
     const c = bytes[i + 2];
     out += BASE64_ALPHABET[a >> 2];
     out += BASE64_ALPHABET[((a & 0x03) << 4) | ((b ?? 0) >> 4)];
-    out += b === undefined ? "=" : BASE64_ALPHABET[((b & 0x0f) << 2) | ((c ?? 0) >> 6)];
+    out +=
+      b === undefined
+        ? "="
+        : BASE64_ALPHABET[((b & 0x0f) << 2) | ((c ?? 0) >> 6)];
     out += c === undefined ? "=" : BASE64_ALPHABET[c & 0x3f];
   }
   return out;

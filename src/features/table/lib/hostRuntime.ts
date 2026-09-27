@@ -43,7 +43,12 @@ export type HostRuntimeOptions = {
   onChange(): void;
 };
 
-const emptySeats = (): Record<Seat, Occupant | null> => ({ 0: null, 1: null, 2: null, 3: null });
+const emptySeats = (): Record<Seat, Occupant | null> => ({
+  0: null,
+  1: null,
+  2: null,
+  3: null,
+});
 
 export class HostRuntime {
   private transport: Transport | null = null;
@@ -117,7 +122,8 @@ export class HostRuntime {
     if (this.started) return;
     for (const seat of SEATS) {
       if (seat === HOST_SEAT) continue;
-      if (isConnected(this.seats[seat]) && this.seats[seat]?.kind === "remote") continue;
+      if (isConnected(this.seats[seat]) && this.seats[seat]?.kind === "remote")
+        continue;
       this.seats[seat] = { kind: "bot", name: `${SEAT_NAMES[seat]} bot` };
     }
     this.publish();
@@ -150,12 +156,18 @@ export class HostRuntime {
   }
 
   view(): PlayerView | null {
-    return this.state === null ? null : viewFor(this.state, this.activeLocalSeat());
+    return this.state === null
+      ? null
+      : viewFor(this.state, this.activeLocalSeat());
   }
 
   start(): void {
     if (this.started || !this.lobby().canStart) return;
-    this.state = newGame({ rules: this.options.rules, seed: this.options.seed, dealer: HOST_SEAT });
+    this.state = newGame({
+      rules: this.options.rules,
+      seed: this.options.seed,
+      dealer: HOST_SEAT,
+    });
     this.publish();
   }
 
@@ -224,7 +236,9 @@ export class HostRuntime {
     // A person takes an open seat first, and a bot's seat only if none is open.
     const free =
       SEATS.find((seat) => this.seats[seat] === null) ??
-      (this.started ? undefined : SEATS.find((seat) => this.seats[seat]?.kind === "bot"));
+      (this.started
+        ? undefined
+        : SEATS.find((seat) => this.seats[seat]?.kind === "bot"));
     if (free === undefined) {
       void this.sendTo(peer, { t: "rejected", reason: "the table is full" });
       return;
@@ -234,7 +248,9 @@ export class HostRuntime {
   }
 
   private sendTo(peer: PeerId, message: object): Promise<void> {
-    return this.transport?.send(peer, JSON.stringify(message)) ?? Promise.resolve();
+    return (
+      this.transport?.send(peer, JSON.stringify(message)) ?? Promise.resolve()
+    );
   }
 
   private queueBotMove(): void {
@@ -267,7 +283,12 @@ export class HostRuntime {
     const lobby = this.lobby();
     for (const seat of SEATS) {
       const occupant = this.seats[seat];
-      if (occupant === null || occupant.kind !== "remote" || !occupant.connected) continue;
+      if (
+        occupant === null ||
+        occupant.kind !== "remote" ||
+        !occupant.connected
+      )
+        continue;
       const message =
         this.state === null
           ? { t: "lobby", seat, lobby }

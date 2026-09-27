@@ -51,7 +51,10 @@ describe("framing", () => {
       }
     }
     expect(results.sort()).toEqual(
-      ["first message that needs several frames", "second message that also needs several"].sort(),
+      [
+        "first message that needs several frames",
+        "second message that also needs several",
+      ].sort(),
     );
   });
 
@@ -63,17 +66,23 @@ describe("framing", () => {
     const assembler = createAssembler();
     const long = createFramer(20).encode("a".repeat(100));
     assembler.push(long[0] as string);
-    expect(assembler.push(createFramer(180).encode("short")[0] as string)).toBe("short");
+    expect(assembler.push(createFramer(180).encode("short")[0] as string)).toBe(
+      "short",
+    );
   });
 });
 
 describe("messages", () => {
   it("accepts the tags it knows", () => {
-    expect(parseClientMessage(JSON.stringify({ t: "hello", name: "Sam" }))).toEqual({
+    expect(
+      parseClientMessage(JSON.stringify({ t: "hello", name: "Sam" })),
+    ).toEqual({
       t: "hello",
       name: "Sam",
     });
-    expect(parseHostMessage(JSON.stringify({ t: "rejected", reason: "no" }))).toEqual({
+    expect(
+      parseHostMessage(JSON.stringify({ t: "rejected", reason: "no" })),
+    ).toEqual({
       t: "rejected",
       reason: "no",
     });

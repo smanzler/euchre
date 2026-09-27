@@ -1,5 +1,17 @@
-import { type Card, RANKS, SUITS, type Suit, rankOf, suitOf } from "@/features/euchre/lib/cards";
-import { effectiveSuit, isLeftBower, isRightBower, isTrump } from "@/features/euchre/lib/trick";
+import {
+  type Card,
+  RANKS,
+  SUITS,
+  type Suit,
+  rankOf,
+  suitOf,
+} from "@/features/euchre/lib/cards";
+import {
+  effectiveSuit,
+  isLeftBower,
+  isRightBower,
+  isTrump,
+} from "@/features/euchre/lib/trick";
 
 /**
  * Hand values are hundredths of a trick, so a threshold never lands on a
@@ -7,7 +19,13 @@ import { effectiveSuit, isLeftBower, isRightBower, isTrump } from "@/features/eu
  */
 export const TRICK = 100;
 
-const TRUMP_WORTH: Record<string, number> = { A: 80, K: 50, Q: 30, T: 15, "9": 15 };
+const TRUMP_WORTH: Record<string, number> = {
+  A: 80,
+  K: 50,
+  Q: 30,
+  T: 15,
+  "9": 15,
+};
 
 const RIGHT_BOWER_WORTH = 100;
 const LEFT_BOWER_WORTH = 90;
@@ -27,12 +45,16 @@ const voidWorth = (hand: readonly Card[], trump: Suit): number => {
   const trumpCount = hand.filter((card) => isTrump(card, trump)).length;
   if (trumpCount < MIN_TRUMP_FOR_VOID) return 0;
   const held = new Set(hand.map((card) => effectiveSuit(card, trump)));
-  return SUITS.filter((suit) => suit !== trump && !held.has(suit)).length * VOID_WORTH;
+  return (
+    SUITS.filter((suit) => suit !== trump && !held.has(suit)).length *
+    VOID_WORTH
+  );
 };
 
 /** What this hand is worth with the given trump, in hundredths of a trick. */
 export const handPoints = (hand: readonly Card[], trump: Suit): number =>
-  hand.reduce((sum, card) => sum + cardWorth(card, trump), 0) + voidWorth(hand, trump);
+  hand.reduce((sum, card) => sum + cardWorth(card, trump), 0) +
+  voidWorth(hand, trump);
 
 /** The card to throw away, keeping trump and making a suit void where it can. */
 export const weakestCard = (hand: readonly Card[], trump: Suit): Card => {
@@ -48,7 +70,10 @@ export const weakestCard = (hand: readonly Card[], trump: Suit): Card => {
     const rank = RANKS.indexOf(rankOf(card));
     return rank - (singleton && rankOf(card) !== "A" ? RANKS.length : 0);
   };
-  return pool.reduce((worst, card) => (cost(card) < cost(worst) ? card : worst), pool[0] as Card);
+  return pool.reduce(
+    (worst, card) => (cost(card) < cost(worst) ? card : worst),
+    pool[0] as Card,
+  );
 };
 
 /** The five cards to keep once a sixth is picked up. */

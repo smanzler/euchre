@@ -60,7 +60,10 @@ export const PlayScreen = () => {
     return (
       <Screen>
         {topBar}
-        <HandoffGate name={names[view.seat]} onReveal={() => setRevealed(view.seat)} />
+        <HandoffGate
+          name={names[view.seat]}
+          onReveal={() => setRevealed(view.seat)}
+        />
       </Screen>
     );
   }
@@ -86,7 +89,9 @@ export const PlayScreen = () => {
 
       <View style={styles.action}>
         <ScrollView contentContainerStyle={styles.actionBody}>
-          {status === null ? null : <Text style={styles.statusText}>{status}</Text>}
+          {status === null ? null : (
+            <Text style={styles.statusText}>{status}</Text>
+          )}
           {table.error === null ? null : (
             <Text style={styles.error} onPress={() => tableStore.clearError()}>
               {table.error}
@@ -98,7 +103,10 @@ export const PlayScreen = () => {
           {view.phase === "game-over" ? (
             <View style={styles.endRow}>
               {table.mode === "hosting" ? (
-                <ActionButton label="Play again" onPress={() => tableStore.restart()} />
+                <ActionButton
+                  label="Play again"
+                  onPress={() => tableStore.restart()}
+                />
               ) : null}
               <ActionButton label="Leave" tone="secondary" onPress={leave} />
             </View>
@@ -110,7 +118,11 @@ export const PlayScreen = () => {
         hand={view.hand}
         trump={view.trump}
         playable={canAct && cardIntent !== null ? panel.playable(view) : []}
-        onPlay={canAct && cardIntent !== null ? (card) => send(cardIntent(card)) : null}
+        onPlay={
+          canAct && cardIntent !== null
+            ? (card) => send(cardIntent(card))
+            : null
+        }
         note={view.sittingOut === view.seat ? "You sit this hand out." : null}
       />
     </Screen>

@@ -1,4 +1,11 @@
-import { type Card, RANKS, type Suit, rankOf, sameColorSuit, suitOf } from "./cards";
+import {
+  type Card,
+  RANKS,
+  type Suit,
+  rankOf,
+  sameColorSuit,
+  suitOf,
+} from "./cards";
 
 export const isRightBower = (card: Card, trump: Suit): boolean =>
   rankOf(card) === "J" && suitOf(card) === trump;
@@ -27,10 +34,15 @@ export const cardStrength = (card: Card, trump: Suit, led: Suit): number => {
   return 0;
 };
 
-export const sortForHand = (hand: readonly Card[], trump: Suit | null): Card[] => {
+export const sortForHand = (
+  hand: readonly Card[],
+  trump: Suit | null,
+): Card[] => {
   const order = (card: Card): number => {
     if (trump === null) {
-      return SUIT_ORDER.indexOf(suitOf(card)) * 10 + RANKS.indexOf(rankOf(card));
+      return (
+        SUIT_ORDER.indexOf(suitOf(card)) * 10 + RANKS.indexOf(rankOf(card))
+      );
     }
     const suit = effectiveSuit(card, trump);
     const suitRank = suit === trump ? -1 : SUIT_ORDER.indexOf(suit);
@@ -62,7 +74,9 @@ export const trickWinner = <Seat>(
   const led = effectiveSuit(first.card, trump);
   let best = first;
   for (const play of plays) {
-    if (cardStrength(play.card, trump, led) > cardStrength(best.card, trump, led)) {
+    if (
+      cardStrength(play.card, trump, led) > cardStrength(best.card, trump, led)
+    ) {
       best = play;
     }
   }

@@ -22,4 +22,8 @@ export const profileStore = {
 };
 
 export const useDisplayName = (): string =>
-  useSyncExternalStore(profileStore.subscribe, profileStore.getSnapshot, profileStore.getSnapshot);
+  useSyncExternalStore(
+    profileStore.subscribe,
+    profileStore.getSnapshot,
+    profileStore.getSnapshot,
+  );

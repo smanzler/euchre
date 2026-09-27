@@ -54,14 +54,21 @@ export const scanForTables = (handlers: ScanHandlers): (() => void) => {
       return;
     }
     if (stopped) return;
-    manager.startDeviceScan([EUCHRE_SERVICE_UUID], { allowDuplicates: false }, (error, device) => {
-      if (error !== null) {
-        handlers.onError(error.message);
-        return;
-      }
-      if (device === null) return;
-      handlers.onFound({ id: device.id, name: tableNameFrom(device as Advertisement) });
-    });
+    manager.startDeviceScan(
+      [EUCHRE_SERVICE_UUID],
+      { allowDuplicates: false },
+      (error, device) => {
+        if (error !== null) {
+          handlers.onError(error.message);
+          return;
+        }
+        if (device === null) return;
+        handlers.onFound({
+          id: device.id,
+          name: tableNameFrom(device as Advertisement),
+        });
+      },
+    );
   })();
 
   return stop;

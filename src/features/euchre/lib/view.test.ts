@@ -13,7 +13,11 @@ describe("viewFor", () => {
 
   it("lists legal plays only for the seat on turn", () => {
     const start = newGame({ seed: 7, dealer: 0 });
-    const ordered = applyAction(start, { type: "order-up", seat: 1, alone: false });
+    const ordered = applyAction(start, {
+      type: "order-up",
+      seat: 1,
+      alone: false,
+    });
     if (!ordered.ok) throw new Error(ordered.reason);
     const playing = applyAction(ordered.state, {
       type: "discard",
@@ -27,7 +31,11 @@ describe("viewFor", () => {
 
   it("counts the tricks each seat takes", () => {
     const start = newGame({ seed: 7, dealer: 0 });
-    const ordered = applyAction(start, { type: "order-up", seat: 1, alone: false });
+    const ordered = applyAction(start, {
+      type: "order-up",
+      seat: 1,
+      alone: false,
+    });
     if (!ordered.ok) throw new Error(ordered.reason);
     const discarded = applyAction(ordered.state, {
       type: "discard",

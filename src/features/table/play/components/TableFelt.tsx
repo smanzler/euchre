@@ -28,12 +28,20 @@ const FeltCentre = ({
   names: Record<Seat, string>;
   settledBy: string | null;
 }) => {
-  if (settledBy !== null) return <Text style={styles.trickWinner}>{settledBy} took it</Text>;
+  if (settledBy !== null)
+    return <Text style={styles.trickWinner}>{settledBy} took it</Text>;
   // A dimmed upcard is the suit the table turned down and may not name.
   if (view.upcard !== null) {
-    return <CardView card={view.upcard} size="md" dimmed={view.phase === "bidding-call"} />;
+    return (
+      <CardView
+        card={view.upcard}
+        size="md"
+        dimmed={view.phase === "bidding-call"}
+      />
+    );
   }
-  if (view.trump === null) return <Text style={styles.centreLabel}>no trump yet</Text>;
+  if (view.trump === null)
+    return <Text style={styles.centreLabel}>no trump yet</Text>;
   if (view.maker === null) return null;
   return (
     <Text style={styles.centreLabel}>
@@ -57,7 +65,11 @@ export const TableFelt = ({ view, names }: TableFeltProps) => {
         played={played.get(seat) ?? null}
         onTurn={settled === null && view.turn === seat}
         wonTrick={settled !== null && settled.winner === seat}
-        sweep={settled === null ? null : towardSeat[((settled.winner - view.seat + 4) % 4) as Seat]}
+        sweep={
+          settled === null
+            ? null
+            : towardSeat[((settled.winner - view.seat + 4) % 4) as Seat]
+        }
         sittingOut={view.sittingOut === seat}
         isDealer={view.dealer === seat}
         tricks={view.trump === null ? null : view.tricksBySeat[seat]}
@@ -107,7 +119,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  centre: { flex: 1, alignItems: "center", justifyContent: "center", gap: spacing.xs },
-  centreLabel: { ...typography.label, color: colors.inkMuted, textAlign: "center" },
-  trickWinner: { ...typography.body, fontWeight: "800", color: colors.good, textAlign: "center" },
+  centre: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+  },
+  centreLabel: {
+    ...typography.label,
+    color: colors.inkMuted,
+    textAlign: "center",
+  },
+  trickWinner: {
+    ...typography.body,
+    fontWeight: "800",
+    color: colors.good,
+    textAlign: "center",
+  },
 });

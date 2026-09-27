@@ -36,7 +36,9 @@ describe("cardStrength", () => {
   });
 
   it("puts any trump above the led suit", () => {
-    expect(cardStrength("9H", "H", "S")).toBeGreaterThan(cardStrength("AS", "H", "S"));
+    expect(cardStrength("9H", "H", "S")).toBeGreaterThan(
+      cardStrength("AS", "H", "S"),
+    );
   });
 
   it("scores a card that neither follows nor trumps as zero", () => {

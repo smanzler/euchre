@@ -2,7 +2,8 @@ import { PermissionsAndroid, Platform } from "react-native";
 
 const ANDROID_12 = 31;
 
-type AndroidPermission = (typeof PermissionsAndroid.PERMISSIONS)[keyof typeof PermissionsAndroid.PERMISSIONS];
+type AndroidPermission =
+  (typeof PermissionsAndroid.PERMISSIONS)[keyof typeof PermissionsAndroid.PERMISSIONS];
 
 const scanPermissions = (): AndroidPermission[] =>
   Number(Platform.Version) >= ANDROID_12
@@ -28,7 +29,8 @@ const request = async (permissions: AndroidPermission[]): Promise<boolean> => {
   );
 };
 
-export const requestScanPermissions = (): Promise<boolean> => request(scanPermissions());
+export const requestScanPermissions = (): Promise<boolean> =>
+  request(scanPermissions());
 
 export const requestAdvertisePermissions = (): Promise<boolean> =>
   request(advertisePermissions());

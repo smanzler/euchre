@@ -12,7 +12,10 @@ const nextRandom = (state: number): { value: number; state: number } => {
 
 export const randomSeed = (): number => (Math.random() * 0xffffffff) >>> 0;
 
-export const shuffle = <T>(items: readonly T[], seed: number): { items: T[]; seed: number } => {
+export const shuffle = <T>(
+  items: readonly T[],
+  seed: number,
+): { items: T[]; seed: number } => {
   const out = [...items];
   let state = seed;
   for (let i = out.length - 1; i > 0; i -= 1) {
@@ -39,7 +42,10 @@ export const deal = (seed: number): Deal => {
   const shuffled = shuffle(DECK, seed);
   const hands = {} as Record<Seat, readonly Card[]>;
   SEATS.forEach((seat, index) => {
-    hands[seat] = shuffled.items.slice(index * HAND_SIZE, (index + 1) * HAND_SIZE);
+    hands[seat] = shuffled.items.slice(
+      index * HAND_SIZE,
+      (index + 1) * HAND_SIZE,
+    );
   });
   return {
     hands,
