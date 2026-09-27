@@ -44,13 +44,19 @@ const seatThree = (runtime: HostRuntime): void => {
 };
 
 const lastTo = (sent: Sent[], peer: PeerId) =>
-  parseHostMessage(sent.filter((entry) => entry.peer === peer).at(-1)?.text ?? "");
+  parseHostMessage(
+    sent.filter((entry) => entry.peer === peer).at(-1)?.text ?? "",
+  );
 
 describe("HostRuntime lobby", () => {
   it("keeps the host at seat zero and leaves the rest open", () => {
     const { runtime } = hostedTable();
     const lobby = runtime.lobby();
-    expect(lobby.players[0]).toMatchObject({ name: "Sam", kind: "host", connected: true });
+    expect(lobby.players[0]).toMatchObject({
+      name: "Sam",
+      kind: "host",
+      connected: true,
+    });
     expect(lobby.players.filter((player) => player.connected)).toHaveLength(1);
     expect(lobby.canStart).toBe(false);
   });
@@ -59,7 +65,12 @@ describe("HostRuntime lobby", () => {
     const { runtime } = hostedTable();
     seatThree(runtime);
     const lobby = runtime.lobby();
-    expect(lobby.players.map((player) => player.name)).toEqual(["Sam", "Ada", "Bo", "Cy"]);
+    expect(lobby.players.map((player) => player.name)).toEqual([
+      "Sam",
+      "Ada",
+      "Bo",
+      "Cy",
+    ]);
     expect(lobby.canStart).toBe(true);
   });
 
@@ -68,7 +79,10 @@ describe("HostRuntime lobby", () => {
     seatThree(runtime);
     runtime.onPeerJoin("p4");
     runtime.onMessage("p4", JSON.stringify({ t: "hello", name: "Dee" }));
-    expect(lastTo(sent, "p4")).toEqual({ t: "rejected", reason: "the table is full" });
+    expect(lastTo(sent, "p4")).toEqual({
+      t: "rejected",
+      reason: "the table is full",
+    });
     expect(runtime.lobby().players).toHaveLength(4);
   });
 
@@ -76,7 +90,10 @@ describe("HostRuntime lobby", () => {
     const { runtime } = hostedTable();
     seatThree(runtime);
     runtime.onPeerLeave("p2");
-    expect(runtime.lobby().players[2]).toMatchObject({ name: "Open seat", connected: false });
+    expect(runtime.lobby().players[2]).toMatchObject({
+      name: "Open seat",
+      connected: false,
+    });
     expect(runtime.lobby().canStart).toBe(false);
   });
 
@@ -85,7 +102,10 @@ describe("HostRuntime lobby", () => {
     seatThree(runtime);
     runtime.start();
     runtime.onPeerLeave("p2");
-    expect(runtime.lobby().players[2]).toMatchObject({ name: "Bo", connected: false });
+    expect(runtime.lobby().players[2]).toMatchObject({
+      name: "Bo",
+      connected: false,
+    });
   });
 
   it("names a seat the host holds, and refuses a remote player's seat", () => {
@@ -125,7 +145,9 @@ describe("HostRuntime play", () => {
     expect(toAda.view.hand).toHaveLength(5);
     const hostView = runtime.view();
     expect(hostView?.hand).not.toEqual(toAda.view.hand);
-    expect(JSON.stringify(toAda.view)).not.toContain(hostView?.hand[0] as string);
+    expect(JSON.stringify(toAda.view)).not.toContain(
+      hostView?.hand[0] as string,
+    );
   });
 
   it("takes a legal move from the seated peer", () => {
@@ -133,7 +155,10 @@ describe("HostRuntime play", () => {
     seatThree(runtime);
     runtime.start();
     expect(runtime.view()?.turn).toBe(1);
-    runtime.onMessage("p1", JSON.stringify({ t: "intent", intent: { type: "pass" } }));
+    runtime.onMessage(
+      "p1",
+      JSON.stringify({ t: "intent", intent: { type: "pass" } }),
+    );
     expect(runtime.view()?.turn).toBe(2);
     expect(lastTo(sent, "p1")?.t).toBe("view");
   });
@@ -142,15 +167,27 @@ describe("HostRuntime play", () => {
     const { runtime, sent } = hostedTable();
     seatThree(runtime);
     runtime.start();
-    runtime.onMessage("p2", JSON.stringify({ t: "intent", intent: { type: "pass" } }));
-    expect(lastTo(sent, "p2")).toEqual({ t: "rejected", reason: "it is not your turn" });
+    runtime.onMessage(
+      "p2",
+      JSON.stringify({ t: "intent", intent: { type: "pass" } }),
+    );
+    expect(lastTo(sent, "p2")).toEqual({
+      t: "rejected",
+      reason: "it is not your turn",
+    });
   });
 
   it("refuses a move from a peer with no seat", () => {
     const { runtime, sent } = hostedTable();
     runtime.onPeerJoin("stranger");
-    runtime.onMessage("stranger", JSON.stringify({ t: "intent", intent: { type: "pass" } }));
-    expect(lastTo(sent, "stranger")).toEqual({ t: "rejected", reason: "you are not seated" });
+    runtime.onMessage(
+      "stranger",
+      JSON.stringify({ t: "intent", intent: { type: "pass" } }),
+    );
+    expect(lastTo(sent, "stranger")).toEqual({
+      t: "rejected",
+      reason: "you are not seated",
+    });
   });
 
   it("ignores a message it cannot parse", () => {
@@ -212,7 +249,12 @@ describe("HostRuntime bots", () => {
   it("fills every seat but the host's own", () => {
     const runtime = soloTable();
     const lobby = runtime.lobby();
-    expect(lobby.players.map((player) => player.kind)).toEqual(["host", "bot", "bot", "bot"]);
+    expect(lobby.players.map((player) => player.kind)).toEqual([
+      "host",
+      "bot",
+      "bot",
+      "bot",
+    ]);
     expect(lobby.canStart).toBe(true);
     expect(runtime.localSeats()).toEqual([0]);
   });
@@ -220,13 +262,19 @@ describe("HostRuntime bots", () => {
   it("names a bot's seat", () => {
     const runtime = soloTable();
     runtime.renameSeat(2, "Nora");
-    expect(runtime.lobby().players[2]).toMatchObject({ name: "Nora", kind: "bot" });
+    expect(runtime.lobby().players[2]).toMatchObject({
+      name: "Nora",
+      kind: "bot",
+    });
   });
 
   it("gives a seat back when a bot is removed", () => {
     const runtime = soloTable();
     runtime.removeBot(2);
-    expect(runtime.lobby().players[2]).toMatchObject({ kind: "open", connected: false });
+    expect(runtime.lobby().players[2]).toMatchObject({
+      kind: "open",
+      connected: false,
+    });
     expect(runtime.lobby().canStart).toBe(false);
   });
 
@@ -251,7 +299,12 @@ describe("HostRuntime bots", () => {
     runtime.start();
     for (let step = 0; step < 60; step += 1) {
       const view = runtime.view();
-      if (view === null || view.phase === "hand-over" || view.phase === "game-over") break;
+      if (
+        view === null ||
+        view.phase === "hand-over" ||
+        view.phase === "game-over"
+      )
+        break;
       if (view.turn !== 0) break;
       const intent = chooseIntent(view);
       if (intent === null) break;
@@ -283,7 +336,9 @@ describe("HostRuntime bots", () => {
     const view = runtime.view();
     expect(view?.phase).toBe("game-over");
     expect(view?.winner).not.toBeNull();
-    expect(Math.max(view?.score[0] ?? 0, view?.score[1] ?? 0)).toBeGreaterThanOrEqual(10);
+    expect(
+      Math.max(view?.score[0] ?? 0, view?.score[1] ?? 0),
+    ).toBeGreaterThanOrEqual(10);
   });
 
   it("seats a late person in a bot's chair rather than turning them away", () => {
@@ -302,6 +357,8 @@ describe("HostRuntime bots", () => {
     runtime.onMessage("p1", JSON.stringify({ t: "hello", name: "Ada" }));
     const lobby = runtime.lobby();
     expect(lobby.players[1]).toMatchObject({ name: "Ada", kind: "human" });
-    expect(lobby.players.filter((player) => player.kind === "bot")).toHaveLength(2);
+    expect(
+      lobby.players.filter((player) => player.kind === "bot"),
+    ).toHaveLength(2);
   });
 });

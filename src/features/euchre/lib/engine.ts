@@ -22,8 +22,7 @@ import {
 } from "./types";
 
 export type ApplyResult =
-  | { ok: true; state: GameState }
-  | { ok: false; reason: string };
+  { ok: true; state: GameState } | { ok: false; reason: string };
 
 const fail = (reason: string): ApplyResult => ({ ok: false, reason });
 
@@ -96,7 +95,8 @@ const nextActiveSeat = (state: GameState, from: Seat): Seat => {
   return candidate === skip ? nextSeat(candidate) : candidate;
 };
 
-const seatsInPlay = (state: GameState): number => (state.aloneSeat === null ? 4 : 3);
+const seatsInPlay = (state: GameState): number =>
+  state.aloneSeat === null ? 4 : 3;
 
 const withoutCard = (hand: readonly Card[], card: Card): readonly Card[] => {
   const index = hand.indexOf(card);
@@ -115,7 +115,11 @@ const clearSittingOutHand = (state: GameState): GameState => {
  */
 const beginPlay = (state: GameState): GameState => {
   const opened = clearSittingOutHand(state);
-  return { ...opened, phase: "playing", turn: nextActiveSeat(opened, opened.dealer) };
+  return {
+    ...opened,
+    phase: "playing",
+    turn: nextActiveSeat(opened, opened.dealer),
+  };
 };
 
 const scoreHand = (state: GameState): GameState => {
@@ -152,7 +156,11 @@ const scoreHand = (state: GameState): GameState => {
     winner: won ? scoringTeam : null,
   };
   return won
-    ? withEvents(scored, { type: "hand-scored", result }, { type: "game-won", team: scoringTeam })
+    ? withEvents(
+        scored,
+        { type: "hand-scored", result },
+        { type: "game-won", team: scoringTeam },
+      )
     : withEvents(scored, { type: "hand-scored", result });
 };
 
@@ -173,7 +181,10 @@ type ActionHandler<T extends ActionType = ActionType> = {
   readonly phases: readonly Phase[];
   /** Set when a seat that is not on turn may send the action. */
   readonly offTurn?: boolean;
-  apply(state: GameState, action: Extract<GameAction, { type: T }>): ApplyResult;
+  apply(
+    state: GameState,
+    action: Extract<GameAction, { type: T }>,
+  ): ApplyResult;
 };
 
 const passHandler: ActionHandler = {
@@ -181,13 +192,20 @@ const passHandler: ActionHandler = {
   apply(state, action) {
     if (action.type !== "pass") return fail("wrong handler");
     const isDealer = action.seat === state.dealer;
-    if (state.phase === "bidding-call" && isDealer && state.rules.stickTheDealer) {
+    if (
+      state.phase === "bidding-call" &&
+      isDealer &&
+      state.rules.stickTheDealer
+    ) {
       return fail("the dealer must name a suit");
     }
-    const passed = withEvents({ ...state, passes: state.passes + 1 }, {
-      type: "passed",
-      seat: action.seat,
-    });
+    const passed = withEvents(
+      { ...state, passes: state.passes + 1 },
+      {
+        type: "passed",
+        seat: action.seat,
+      },
+    );
     if (passed.passes < SEATS.length) {
       return done({ ...passed, turn: nextSeat(passed.turn) });
     }
@@ -218,11 +236,19 @@ const orderUpHandler: ActionHandler = {
         aloneSeat: action.alone ? action.seat : null,
         upcard: null,
         passes: 0,
-        hands: { ...state.hands, [state.dealer]: [...state.hands[state.dealer], upcard] },
+        hands: {
+          ...state.hands,
+          [state.dealer]: [...state.hands[state.dealer], upcard],
+        },
         phase: "dealer-discard",
         turn: state.dealer,
       },
-      { type: "ordered-up", seat: action.seat, suit: trump, alone: action.alone },
+      {
+        type: "ordered-up",
+        seat: action.seat,
+        suit: trump,
+        alone: action.alone,
+      },
     );
     if (sittingOutSeat(called) !== state.dealer) return done(called);
     const skipped: GameState = {
@@ -250,7 +276,12 @@ const callTrumpHandler: ActionHandler = {
         upcard: null,
         passes: 0,
       },
-      { type: "called", seat: action.seat, suit: action.suit, alone: action.alone },
+      {
+        type: "called",
+        seat: action.seat,
+        suit: action.suit,
+        alone: action.alone,
+      },
     );
     return done(beginPlay(called));
   },
@@ -278,7 +309,8 @@ const playCardHandler: ActionHandler = {
     const trump = state.trump;
     if (trump === null) return fail("trump is not set");
     const hand = state.hands[action.seat];
-    if (!hand.includes(action.card)) return fail("that card is not in your hand");
+    if (!hand.includes(action.card))
+      return fail("that card is not in your hand");
     const first = state.trick[0];
     const led = first === undefined ? null : effectiveSuit(first.card, trump);
     if (!legalPlays(hand, led, trump).includes(action.card)) {
@@ -289,7 +321,8 @@ const playCardHandler: ActionHandler = {
       hands: { ...state.hands, [action.seat]: withoutCard(hand, action.card) },
       trick: [...state.trick, { seat: action.seat, card: action.card }],
     };
-    if (played.trick.length === seatsInPlay(played)) return done(resolveTrick(played));
+    if (played.trick.length === seatsInPlay(played))
+      return done(resolveTrick(played));
     return done({ ...played, turn: nextActiveSeat(played, action.seat) });
   },
 } satisfies ActionHandler<"play-card">;
@@ -312,7 +345,10 @@ const actionHandlers: Record<ActionType, ActionHandler> = {
   "next-hand": nextHandHandler,
 };
 
-export const applyAction = (state: GameState, action: GameAction): ApplyResult => {
+export const applyAction = (
+  state: GameState,
+  action: GameAction,
+): ApplyResult => {
   const handler = actionHandlers[action.type];
   if (!handler.phases.includes(state.phase)) {
     return fail(`cannot ${action.type} during ${state.phase}`);
@@ -326,10 +362,15 @@ export const applyAction = (state: GameState, action: GameAction): ApplyResult =
   return handler.apply(state, action);
 };
 
-export const legalPlaysFor = (state: GameState, seat: Seat): readonly Card[] => {
-  if (state.phase !== "playing" || state.trump === null || state.turn !== seat) return [];
+export const legalPlaysFor = (
+  state: GameState,
+  seat: Seat,
+): readonly Card[] => {
+  if (state.phase !== "playing" || state.trump === null || state.turn !== seat)
+    return [];
   const first = state.trick[0];
-  const led = first === undefined ? null : effectiveSuit(first.card, state.trump);
+  const led =
+    first === undefined ? null : effectiveSuit(first.card, state.trump);
   return legalPlays(state.hands[seat], led, state.trump);
 };
 
@@ -342,4 +383,7 @@ export const callableSuits = (state: GameState): readonly Suit[] => {
 export const tricksWonBy = (state: GameState, team: Team): number =>
   state.completed.filter((trick) => teamOf(trick.winner) === team).length;
 
-export const partnerLabelSeats = (seat: Seat): readonly Seat[] => [seat, partnerOf(seat)];
+export const partnerLabelSeats = (seat: Seat): readonly Seat[] => [
+  seat,
+  partnerOf(seat),
+];

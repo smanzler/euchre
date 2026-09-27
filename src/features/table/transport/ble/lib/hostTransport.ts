@@ -62,7 +62,10 @@ const openHost = async (options: OpenOptions): Promise<Transport> => {
 
   subscriptions.push(
     peripheral.on("onCentralSubscribed", ({ id, mtu }) => {
-      const chunkBytes = Math.max(20, (mtu || DEFAULT_CHUNK_BYTES) - ATT_OVERHEAD_BYTES);
+      const chunkBytes = Math.max(
+        20,
+        (mtu || DEFAULT_CHUNK_BYTES) - ATT_OVERHEAD_BYTES,
+      );
       peers.set(id, {
         framer: createFramer(chunkBytes),
         assembler: createAssembler(),

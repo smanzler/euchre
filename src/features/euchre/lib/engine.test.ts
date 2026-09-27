@@ -6,7 +6,8 @@ const SEED = 20240918;
 
 const expectOk = (state: GameState, action: GameAction): GameState => {
   const result = applyAction(state, action);
-  if (!result.ok) throw new Error(`expected ${action.type} to be legal: ${result.reason}`);
+  if (!result.ok)
+    throw new Error(`expected ${action.type} to be legal: ${result.reason}`);
   return result.state;
 };
 
@@ -32,7 +33,9 @@ const withState = (over: Partial<GameState>): GameState => ({
 describe("newGame", () => {
   it("deals five cards to each seat and turns one card up", () => {
     const state = newGame({ seed: SEED, dealer: 0 });
-    expect(Object.values(state.hands).map((hand) => hand.length)).toEqual([5, 5, 5, 5]);
+    expect(Object.values(state.hands).map((hand) => hand.length)).toEqual([
+      5, 5, 5, 5,
+    ]);
     expect(state.upcard).not.toBeNull();
     const all = [...Object.values(state.hands).flat(), state.upcard as Card];
     expect(new Set(all).size).toBe(21);
@@ -45,7 +48,9 @@ describe("newGame", () => {
   });
 
   it("deals the same hand for the same seed", () => {
-    expect(newGame({ seed: SEED }).hands).toEqual(newGame({ seed: SEED }).hands);
+    expect(newGame({ seed: SEED }).hands).toEqual(
+      newGame({ seed: SEED }).hands,
+    );
   });
 });
 
@@ -53,7 +58,11 @@ describe("bidding", () => {
   it("gives the upcard to the dealer when a seat orders it up", () => {
     const state = newGame({ seed: SEED, dealer: 0 });
     const upcard = state.upcard as Card;
-    const ordered = expectOk(state, { type: "order-up", seat: 1, alone: false });
+    const ordered = expectOk(state, {
+      type: "order-up",
+      seat: 1,
+      alone: false,
+    });
     expect(ordered.trump).toBe(upcard[1]);
     expect(ordered.maker).toBe(1);
     expect(ordered.phase).toBe("dealer-discard");
@@ -75,19 +84,30 @@ describe("bidding", () => {
     const state = passAround(newGame({ seed: SEED, dealer: 0 }), 4);
     const turnedDown = (state.upcard as Card)[1] as "C" | "D" | "H" | "S";
     expect(callableSuits(state)).not.toContain(turnedDown);
-    expect(expectFail(state, { type: "call-trump", seat: 1, suit: turnedDown, alone: false })).toMatch(
-      /turned down/,
-    );
+    expect(
+      expectFail(state, {
+        type: "call-trump",
+        seat: 1,
+        suit: turnedDown,
+        alone: false,
+      }),
+    ).toMatch(/turned down/);
   });
 
   it("sticks the dealer when the rule is on", () => {
     const state = passAround(newGame({ seed: SEED, dealer: 0 }), 7);
     expect(state.turn).toBe(0);
-    expect(expectFail(state, { type: "pass", seat: 0 })).toMatch(/must name a suit/);
+    expect(expectFail(state, { type: "pass", seat: 0 })).toMatch(
+      /must name a suit/,
+    );
   });
 
   it("redeals with a new dealer when the rule is off", () => {
-    const start = newGame({ seed: SEED, dealer: 0, rules: { stickTheDealer: false } });
+    const start = newGame({
+      seed: SEED,
+      dealer: 0,
+      rules: { stickTheDealer: false },
+    });
     const state = passAround(start, 8);
     expect(state.phase).toBe("bidding-up");
     expect(state.dealer).toBe(1);
@@ -102,7 +122,11 @@ describe("bidding", () => {
       alone: false,
     });
     const discard = ordered.hands[0][0] as Card;
-    const playing = expectOk(ordered, { type: "discard", seat: 0, card: discard });
+    const playing = expectOk(ordered, {
+      type: "discard",
+      seat: 0,
+      card: discard,
+    });
     expect(playing.phase).toBe("playing");
     expect(playing.turn).toBe(1);
     expect(playing.hands[0]).toHaveLength(5);
@@ -115,10 +139,12 @@ describe("bidding", () => {
       seat: 1,
       alone: false,
     });
-    const notHeld = (["9C", "9D", "9H", "9S", "AC", "AD", "AH", "AS"] as Card[]).find(
-      (card) => !ordered.hands[0].includes(card),
-    ) as Card;
-    expect(expectFail(ordered, { type: "discard", seat: 0, card: notHeld })).toMatch(/not in/);
+    const notHeld = (
+      ["9C", "9D", "9H", "9S", "AC", "AD", "AH", "AS"] as Card[]
+    ).find((card) => !ordered.hands[0].includes(card)) as Card;
+    expect(
+      expectFail(ordered, { type: "discard", seat: 0, card: notHeld }),
+    ).toMatch(/not in/);
   });
 });
 
@@ -185,20 +211,30 @@ describe("play rules", () => {
       seat: 1,
       alone: false,
     });
-    return expectOk(ordered, { type: "discard", seat: 0, card: ordered.hands[0][0] as Card });
+    return expectOk(ordered, {
+      type: "discard",
+      seat: 0,
+      card: ordered.hands[0][0] as Card,
+    });
   };
 
   it("refuses a card from a seat that is not on turn", () => {
     const state = openPlay();
-    expect(expectFail(state, { type: "play-card", seat: 2, card: state.hands[2][0] as Card })).toMatch(
-      /not your turn/,
-    );
+    expect(
+      expectFail(state, {
+        type: "play-card",
+        seat: 2,
+        card: state.hands[2][0] as Card,
+      }),
+    ).toMatch(/not your turn/);
   });
 
   it("refuses a card the seat does not hold", () => {
     const state = openPlay();
     const notHeld = state.hands[2][0] as Card;
-    expect(expectFail(state, { type: "play-card", seat: 1, card: notHeld })).toMatch(/not in your hand/);
+    expect(
+      expectFail(state, { type: "play-card", seat: 1, card: notHeld }),
+    ).toMatch(/not in your hand/);
   });
 
   it("makes a seat follow suit", () => {
@@ -210,13 +246,17 @@ describe("play rules", () => {
       hands: { 0: [], 1: ["9C", "AS"], 2: [], 3: [] },
       trick: [{ seat: 0, card: "KC" }],
     });
-    expect(expectFail(state, { type: "play-card", seat: 1, card: "AS" })).toMatch(/follow suit/);
+    expect(
+      expectFail(state, { type: "play-card", seat: 1, card: "AS" }),
+    ).toMatch(/follow suit/);
     expect(legalPlaysFor(state, 1)).toEqual(["9C"]);
   });
 
   it("refuses an action in the wrong phase", () => {
     const state = openPlay();
-    expect(expectFail(state, { type: "pass", seat: 1 })).toMatch(/cannot pass during playing/);
+    expect(expectFail(state, { type: "pass", seat: 1 })).toMatch(
+      /cannot pass during playing/,
+    );
   });
 });
 
@@ -233,7 +273,8 @@ describe("scoring", () => {
       ...over,
     });
 
-  const wonBy = (winners: Seat[]) => winners.map((winner) => ({ plays: [], winner }));
+  const wonBy = (winners: Seat[]) =>
+    winners.map((winner) => ({ plays: [], winner }));
 
   const playOut = (state: GameState): GameState => {
     let next = state;
@@ -249,14 +290,23 @@ describe("scoring", () => {
 
   it("gives the makers one point for three or four tricks", () => {
     const state = playOut(lastTrick({ completed: wonBy([1, 1, 0, 0]) }));
-    expect(state.lastHand).toMatchObject({ makerTricks: 3, points: 1, scoringTeam: 1, euchred: false });
+    expect(state.lastHand).toMatchObject({
+      makerTricks: 3,
+      points: 1,
+      scoringTeam: 1,
+      euchred: false,
+    });
     expect(state.score).toEqual({ 0: 0, 1: 1 });
     expect(state.phase).toBe("hand-over");
   });
 
   it("gives the makers two points for a march", () => {
     const state = playOut(lastTrick({ completed: wonBy([1, 3, 1, 3]) }));
-    expect(state.lastHand).toMatchObject({ makerTricks: 5, points: 2, scoringTeam: 1 });
+    expect(state.lastHand).toMatchObject({
+      makerTricks: 5,
+      points: 2,
+      scoringTeam: 1,
+    });
   });
 
   it("gives a lone march four points", () => {
@@ -267,20 +317,34 @@ describe("scoring", () => {
         completed: wonBy([1, 1, 1, 1]),
       }),
     );
-    expect(state.lastHand).toMatchObject({ makerTricks: 5, alone: true, points: 4, scoringTeam: 1 });
+    expect(state.lastHand).toMatchObject({
+      makerTricks: 5,
+      alone: true,
+      points: 4,
+      scoringTeam: 1,
+    });
   });
 
   it("gives the defenders two points for a euchre", () => {
     const state = playOut(lastTrick({ completed: wonBy([0, 0, 2, 1]) }));
-    expect(state.lastHand).toMatchObject({ makerTricks: 2, points: 2, scoringTeam: 0, euchred: true });
+    expect(state.lastHand).toMatchObject({
+      makerTricks: 2,
+      points: 2,
+      scoringTeam: 0,
+      euchred: true,
+    });
     expect(state.score).toEqual({ 0: 2, 1: 0 });
   });
 
   it("ends the game when a team reaches the target", () => {
-    const state = playOut(lastTrick({ score: { 0: 0, 1: 9 }, completed: wonBy([1, 1, 0, 0]) }));
+    const state = playOut(
+      lastTrick({ score: { 0: 0, 1: 9 }, completed: wonBy([1, 1, 0, 0]) }),
+    );
     expect(state.phase).toBe("game-over");
     expect(state.winner).toBe(1);
-    expect(expectFail(state, { type: "next-hand", seat: 0 })).toMatch(/cannot next-hand/);
+    expect(expectFail(state, { type: "next-hand", seat: 0 })).toMatch(
+      /cannot next-hand/,
+    );
   });
 
   it("deals the next hand with the dealer moved along", () => {

@@ -1,6 +1,12 @@
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { ActionButton } from "@/components/ActionButton";
 import { Panel } from "@/components/Panel";
 import { Screen } from "@/components/Screen";
@@ -24,7 +30,9 @@ export const JoinScreen = () => {
     const stop = scanForTables({
       onFound: (table) =>
         setTables((current) =>
-          current.some((known) => known.id === table.id) ? current : [...current, table],
+          current.some((known) => known.id === table.id)
+            ? current
+            : [...current, table],
         ),
       onError: setError,
     });
@@ -68,7 +76,9 @@ export const JoinScreen = () => {
               style={({ pressed }) => [styles.row, pressed && styles.pressed]}
             >
               <Text style={styles.name}>{table.name}</Text>
-              <Text style={styles.tag}>{joining === table.id ? "joining…" : "tap to join"}</Text>
+              <Text style={styles.tag}>
+                {joining === table.id ? "joining…" : "tap to join"}
+              </Text>
             </Pressable>
           ))
         )}

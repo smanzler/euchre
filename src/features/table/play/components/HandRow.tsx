@@ -27,29 +27,39 @@ type HandRowProps = {
   note?: string | null;
 };
 
-export const HandRow = ({ hand, trump, playable, onPlay, note = null }: HandRowProps) => {
+export const HandRow = ({
+  hand,
+  trump,
+  playable,
+  onPlay,
+  note = null,
+}: HandRowProps) => {
   const { width } = useWindowDimensions();
   const spare = width - SIDE_PADDING - GAP * (HAND_SLOTS - 1);
-  const box = cardBoxOfWidth(Math.min(MAX_CARD_WIDTH, Math.floor(spare / HAND_SLOTS)));
+  const box = cardBoxOfWidth(
+    Math.min(MAX_CARD_WIDTH, Math.floor(spare / HAND_SLOTS)),
+  );
   return (
     <View style={[styles.row, { height: box.height + RAISE }]}>
-      {hand.length === 0
-        ? note === null
-          ? null
-          : <Text style={styles.empty}>{note}</Text>
-        : sortForHand(hand, trump).map((card) => {
-            const enabled = onPlay !== null && playable.includes(card);
-            return (
-              <CardView
-                key={card}
-                card={card}
-                box={box}
-                dimmed={onPlay !== null && !enabled}
-                raised={enabled}
-                onPress={enabled ? () => onPlay(card) : undefined}
-              />
-            );
-          })}
+      {hand.length === 0 ? (
+        note === null ? null : (
+          <Text style={styles.empty}>{note}</Text>
+        )
+      ) : (
+        sortForHand(hand, trump).map((card) => {
+          const enabled = onPlay !== null && playable.includes(card);
+          return (
+            <CardView
+              key={card}
+              card={card}
+              box={box}
+              dimmed={onPlay !== null && !enabled}
+              raised={enabled}
+              onPress={enabled ? () => onPlay(card) : undefined}
+            />
+          );
+        })
+      )}
     </View>
   );
 };

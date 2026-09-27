@@ -40,7 +40,9 @@ export const HomeScreen = () => {
     <Screen scroll>
       <View style={styles.header}>
         <Text style={styles.title}>Euchre</Text>
-        <Text style={styles.subtitle}>Four players, twenty four cards, bowers and all.</Text>
+        <Text style={styles.subtitle}>
+          Four players, twenty four cards, bowers and all.
+        </Text>
       </View>
 
       {table.mode === "idle" ? null : (
@@ -85,7 +87,9 @@ export const HomeScreen = () => {
           disabled={busy || hostBlocked !== null}
           onPress={() => void open("ble-host")}
         />
-        {hostBlocked === null ? null : <Text style={styles.note}>{hostBlocked}</Text>}
+        {hostBlocked === null ? null : (
+          <Text style={styles.note}>{hostBlocked}</Text>
+        )}
         <ActionButton
           label="Pass and play on this device"
           tone="secondary"

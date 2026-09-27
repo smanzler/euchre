@@ -29,8 +29,11 @@
     "babel-preset-expo": "~57.0.5",
     "eslint": "^9.39.5",
     "eslint-config-expo": "^57.0.2",
+    "husky": "^9.1.7",
     "jest": "^30.5.1",
     "jest-expo": "~57.0.5",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.9",
     "react-dom": "^19.2.3",
     "typescript": "~6.0.3"
   },
@@ -42,7 +45,14 @@
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "prebuild": "expo prebuild",
-    "lint": "eslint . --max-warnings=0"
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "check": "prettier --check .",
+    "prepare": "husky"
   },
-  "private": true
+  "private": true,
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint --fix",
+    "*": "prettier --write --ignore-unknown"
+  }
 }

@@ -32,44 +32,68 @@ const viewWith = (over: Partial<PlayerView>): PlayerView => {
   const view = { ...base, ...over };
   if (view.phase !== "playing" || view.trump === null) return view;
   const first = view.trick[0];
-  const led = first === undefined ? null : effectiveSuit(first.card, view.trump);
+  const led =
+    first === undefined ? null : effectiveSuit(first.card, view.trump);
   return { ...view, legalPlays: legalPlays(view.hand, led, view.trump) };
 };
 
 describe("ordering up", () => {
   it("orders up on both bowers and an ace", () => {
     const intent = chooseIntent(
-      viewWith({ hand: ["JH", "JD", "AH", "9C", "TS"], upcard: "KH", dealer: 3, seat: 0 }),
+      viewWith({
+        hand: ["JH", "JD", "AH", "9C", "TS"],
+        upcard: "KH",
+        dealer: 3,
+        seat: 0,
+      }),
     );
     expect(intent).toEqual({ type: "order-up", alone: false });
   });
 
   it("passes on a hand with nothing in the suit", () => {
     const intent = chooseIntent(
-      viewWith({ hand: ["9C", "TC", "QS", "9S", "TD"], upcard: "KH", dealer: 3, seat: 0 }),
+      viewWith({
+        hand: ["9C", "TC", "QS", "9S", "TD"],
+        upcard: "KH",
+        dealer: 3,
+        seat: 0,
+      }),
     );
     expect(intent).toEqual({ type: "pass" });
   });
 
   it("goes alone on a hand that takes them all", () => {
     const intent = chooseIntent(
-      viewWith({ hand: ["JH", "JD", "AH", "KH", "AS"], upcard: "QH", dealer: 3, seat: 0 }),
+      viewWith({
+        hand: ["JH", "JD", "AH", "KH", "AS"],
+        upcard: "QH",
+        dealer: 3,
+        seat: 0,
+      }),
     );
     expect(intent).toEqual({ type: "order-up", alone: true });
   });
 
   it("counts the upcard the dealer is about to pick up", () => {
     const hand: Card[] = ["JH", "AH", "9C", "TS", "QD"];
-    const asDealer = chooseIntent(viewWith({ hand, upcard: "KH", dealer: 0, seat: 0 }));
-    const asEldest = chooseIntent(viewWith({ hand, upcard: "KH", dealer: 3, seat: 0 }));
+    const asDealer = chooseIntent(
+      viewWith({ hand, upcard: "KH", dealer: 0, seat: 0 }),
+    );
+    const asEldest = chooseIntent(
+      viewWith({ hand, upcard: "KH", dealer: 3, seat: 0 }),
+    );
     expect(asDealer).toMatchObject({ type: "order-up" });
     expect(asEldest).toEqual({ type: "pass" });
   });
 
   it("is keener when the partner takes the upcard than when an opponent does", () => {
     const hand: Card[] = ["JD", "AH", "KH", "9C", "TS"];
-    const partnerDeals = chooseIntent(viewWith({ hand, upcard: "QH", dealer: 2, seat: 0 }));
-    const opponentDeals = chooseIntent(viewWith({ hand, upcard: "QH", dealer: 1, seat: 0 }));
+    const partnerDeals = chooseIntent(
+      viewWith({ hand, upcard: "QH", dealer: 2, seat: 0 }),
+    );
+    const opponentDeals = chooseIntent(
+      viewWith({ hand, upcard: "QH", dealer: 1, seat: 0 }),
+    );
     expect(partnerDeals).toMatchObject({ type: "order-up" });
     expect(opponentDeals).toEqual({ type: "pass" });
   });
@@ -141,14 +165,18 @@ describe("playing", () => {
     chooseIntent(viewWith({ phase: "playing", trump: "H", maker: 0, ...over }));
 
   it("leads the highest trump as the maker to pull trump", () => {
-    expect(playing({ hand: ["JH", "AH", "9C", "TS"], seat: 0, maker: 0 })).toEqual({
+    expect(
+      playing({ hand: ["JH", "AH", "9C", "TS"], seat: 0, maker: 0 }),
+    ).toEqual({
       type: "play-card",
       card: "JH",
     });
   });
 
   it("leads an off suit ace when it is not pulling trump", () => {
-    expect(playing({ hand: ["9H", "AS", "TC", "9D"], seat: 0, maker: 1 })).toEqual({
+    expect(
+      playing({ hand: ["9H", "AS", "TC", "9D"], seat: 0, maker: 1 }),
+    ).toEqual({
       type: "play-card",
       card: "AS",
     });

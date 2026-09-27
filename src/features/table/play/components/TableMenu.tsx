@@ -22,11 +22,20 @@ export const TableMenu = ({ onMenu, onLeave }: TableMenuProps) => {
         <Text style={styles.triggerMark}>☰</Text>
       </Pressable>
 
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+      <Modal
+        visible={open}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setOpen(false)}
+      >
         <Pressable style={styles.scrim} onPress={() => setOpen(false)}>
           <Pressable style={styles.sheet} onPress={() => {}}>
             <Text style={styles.title}>TABLE</Text>
-            <ActionButton label="Back to the game" wide onPress={() => setOpen(false)} />
+            <ActionButton
+              label="Back to the game"
+              wide
+              onPress={() => setOpen(false)}
+            />
             <ActionButton
               label="Go to the menu"
               tone="secondary"
@@ -36,7 +45,9 @@ export const TableMenu = ({ onMenu, onLeave }: TableMenuProps) => {
                 onMenu();
               }}
             />
-            <Text style={styles.note}>The table keeps playing. Come back to it from the menu.</Text>
+            <Text style={styles.note}>
+              The table keeps playing. Come back to it from the menu.
+            </Text>
             <ActionButton
               label="Leave the table"
               tone="danger"
@@ -81,5 +92,10 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   title: { ...typography.label, color: colors.inkMuted },
-  note: { ...typography.body, color: colors.inkDim, fontSize: 13, textAlign: "center" },
+  note: {
+    ...typography.body,
+    color: colors.inkDim,
+    fontSize: 13,
+    textAlign: "center",
+  },
 });

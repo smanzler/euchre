@@ -11,7 +11,10 @@ type ScreenProps = {
 export const Screen = ({ children, scroll = false }: ScreenProps) => (
   <SafeAreaView style={styles.safe} edges={["top", "left", "right", "bottom"]}>
     {scroll ? (
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+      >
         {children}
       </ScrollView>
     ) : (

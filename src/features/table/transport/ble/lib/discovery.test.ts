@@ -25,7 +25,9 @@ describe("tableNameFrom", () => {
   });
 
   it("falls back to the local name an ios host advertises", () => {
-    expect(tableNameFrom({ serviceData: null, localName: "Porch", name: "iPhone" })).toBe("Porch");
+    expect(
+      tableNameFrom({ serviceData: null, localName: "Porch", name: "iPhone" }),
+    ).toBe("Porch");
   });
 
   it("ignores service data for another service", () => {
@@ -39,6 +41,8 @@ describe("tableNameFrom", () => {
   });
 
   it("falls back when the advertisement carries no name at all", () => {
-    expect(tableNameFrom({ serviceData: {}, localName: null, name: null })).toBe("Euchre table");
+    expect(
+      tableNameFrom({ serviceData: {}, localName: null, name: null }),
+    ).toBe("Euchre table");
   });
 });

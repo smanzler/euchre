@@ -1,6 +1,10 @@
 import { Platform } from "react-native";
 import type { Device, Subscription } from "react-native-ble-plx";
-import { DEFAULT_CHUNK_BYTES, createAssembler, createFramer } from "../../lib/protocol";
+import {
+  DEFAULT_CHUNK_BYTES,
+  createAssembler,
+  createFramer,
+} from "../../lib/protocol";
 import type { OpenOptions, Transport, TransportDriver } from "../../lib/types";
 import { getBleManager, waitForBluetooth } from "./bleManager";
 import {
@@ -19,7 +23,8 @@ const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
 const negotiateMtu = async (device: Device): Promise<number> => {
-  if (Platform.OS !== "android") return DEFAULT_CHUNK_BYTES + ATT_OVERHEAD_BYTES;
+  if (Platform.OS !== "android")
+    return DEFAULT_CHUNK_BYTES + ATT_OVERHEAD_BYTES;
   try {
     const upgraded = await device.requestMTU(PREFERRED_MTU);
     return upgraded.mtu ?? DEFAULT_CHUNK_BYTES + ATT_OVERHEAD_BYTES;
@@ -30,7 +35,8 @@ const negotiateMtu = async (device: Device): Promise<number> => {
 
 const openClient = async (options: OpenOptions): Promise<Transport> => {
   const { listener, target } = options;
-  if (target === undefined) throw new Error("joining a table needs a device id");
+  if (target === undefined)
+    throw new Error("joining a table needs a device id");
   listener.onStatus("starting", null);
   if (!(await requestScanPermissions())) {
     listener.onStatus("error", "Bluetooth permission was refused.");
@@ -53,7 +59,9 @@ const openClient = async (options: OpenOptions): Promise<Transport> => {
   };
 
   try {
-    const connected = await manager.connectToDevice(target, { autoConnect: false });
+    const connected = await manager.connectToDevice(target, {
+      autoConnect: false,
+    });
     const mtu = await negotiateMtu(connected);
     await connected.discoverAllServicesAndCharacteristics();
 

@@ -3,7 +3,11 @@ import type { Phase } from "@/features/euchre/lib/types";
 import type { PlayerView } from "@/features/euchre/lib/view";
 import { createAssembler, createFramer } from "../transport/lib/protocol";
 import type { PlayerIntent } from "../transport/lib/protocol";
-import type { PeerId, Transport, TransportListener } from "../transport/lib/types";
+import type {
+  PeerId,
+  Transport,
+  TransportListener,
+} from "../transport/lib/types";
 import { ClientRuntime } from "./clientRuntime";
 import { HostRuntime } from "./hostRuntime";
 
@@ -147,9 +151,10 @@ describe("host and clients over a framed wire", () => {
   it("deals each client a view holding only its own cards", () => {
     const { hostRuntime, clients } = seatTable();
     hostRuntime.start();
-    const hands = [hostRuntime.view(), ...clients.map((client) => client.view)].map(
-      (view) => view?.hand ?? [],
-    );
+    const hands = [
+      hostRuntime.view(),
+      ...clients.map((client) => client.view),
+    ].map((view) => view?.hand ?? []);
     for (const hand of hands) expect(hand).toHaveLength(5);
     expect(new Set(hands.flat()).size).toBe(20);
     const [hostHand, mine, ...rest] = hands;
@@ -182,9 +187,12 @@ describe("host and clients over a framed wire", () => {
         hostRuntime.submit(hostView.seat, intent);
         return true;
       }
-      const onTurn = clients.find((client) => client.view?.turn === client.seat);
+      const onTurn = clients.find(
+        (client) => client.view?.turn === client.seat,
+      );
       const view = onTurn?.view;
-      if (onTurn === undefined || view === undefined || view === null) return false;
+      if (onTurn === undefined || view === undefined || view === null)
+        return false;
       const intent = nextIntents[view.phase](view);
       if (intent === null) return false;
       onTurn.submit(intent);
@@ -217,7 +225,10 @@ describe("host and clients over a framed wire", () => {
     });
     const wire = createWire(listenAsHost(hostRuntime));
     hostRuntime.attach(wire.host);
-    const runtime = new ClientRuntime({ displayName: "Ada", onChange: () => {} });
+    const runtime = new ClientRuntime({
+      displayName: "Ada",
+      onChange: () => {},
+    });
     const transport = wire.join("p1", listenAsClient(runtime));
     runtime.attach(transport);
     expect(hostRuntime.lobby().players[1]?.name).toBe("Ada");

@@ -1,10 +1,12 @@
 export const EUCHRE_SERVICE_UUID = "5ec4a1e0-9b4f-4f2e-8a21-0d2b7c6f1a01";
 
 /** Clients write framed client messages here. */
-export const TO_HOST_CHARACTERISTIC_UUID = "5ec4a1e0-9b4f-4f2e-8a21-0d2b7c6f1a02";
+export const TO_HOST_CHARACTERISTIC_UUID =
+  "5ec4a1e0-9b4f-4f2e-8a21-0d2b7c6f1a02";
 
 /** The host notifies framed host messages here. */
-export const FROM_HOST_CHARACTERISTIC_UUID = "5ec4a1e0-9b4f-4f2e-8a21-0d2b7c6f1a03";
+export const FROM_HOST_CHARACTERISTIC_UUID =
+  "5ec4a1e0-9b4f-4f2e-8a21-0d2b7c6f1a03";
 
 export const PREFERRED_MTU = 247;
 

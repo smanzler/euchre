@@ -29,8 +29,7 @@ export type LobbySnapshot = {
 };
 
 export type ClientMessage =
-  | { t: "hello"; name: string }
-  | { t: "intent"; intent: PlayerIntent };
+  { t: "hello"; name: string } | { t: "intent"; intent: PlayerIntent };
 
 export type HostMessage =
   | { t: "lobby"; seat: Seat; lobby: LobbySnapshot }
@@ -39,7 +38,12 @@ export type HostMessage =
   | { t: "closed"; reason: string };
 
 const CLIENT_TAGS: readonly ClientMessage["t"][] = ["hello", "intent"];
-const HOST_TAGS: readonly HostMessage["t"][] = ["lobby", "view", "rejected", "closed"];
+const HOST_TAGS: readonly HostMessage["t"][] = [
+  "lobby",
+  "view",
+  "rejected",
+  "closed",
+];
 
 const parseTagged = <T extends { t: string }>(
   text: string,
@@ -86,7 +90,10 @@ export const createFramer = (chunkBytes = DEFAULT_CHUNK_BYTES): Framer => {
       nextId = (nextId + 1) % MAX_CHUNKS;
       const frames: string[] = [];
       for (let index = 0; index < total; index += 1) {
-        const slice = bytes.subarray(index * payloadBytes, (index + 1) * payloadBytes);
+        const slice = bytes.subarray(
+          index * payloadBytes,
+          (index + 1) * payloadBytes,
+        );
         const frame = new Uint8Array(FRAME_HEADER_BYTES + slice.length);
         frame[0] = id;
         frame[1] = index;
@@ -120,7 +127,10 @@ export const createAssembler = (): Assembler => {
       const parts =
         held !== undefined && held.length === total
           ? held
-          : Array.from<undefined, Uint8Array | undefined>({ length: total }, () => undefined);
+          : Array.from<undefined, Uint8Array | undefined>(
+              { length: total },
+              () => undefined,
+            );
       parts[index] = bytes.subarray(FRAME_HEADER_BYTES);
       pending.set(id, parts);
       if (parts.some((part) => part === undefined)) return null;
@@ -147,4 +157,7 @@ export const suitIntent = (suit: Suit, alone: boolean): PlayerIntent => ({
   alone,
 });
 
-export const playIntent = (card: Card): PlayerIntent => ({ type: "play-card", card });
+export const playIntent = (card: Card): PlayerIntent => ({
+  type: "play-card",
+  card,
+});

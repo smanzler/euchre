@@ -1,6 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 import { suitSymbol } from "@/features/euchre/lib/cards";
-import { type HandResult, type Seat, seatsOfTeam } from "@/features/euchre/lib/types";
+import {
+  type HandResult,
+  type Seat,
+  seatsOfTeam,
+} from "@/features/euchre/lib/types";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 
 const TRICKS_PER_HAND = 5;
@@ -29,7 +33,10 @@ export const HandSummary = ({ result, names }: HandSummaryProps) => (
     </Text>
     <View style={styles.pips}>
       {Array.from({ length: TRICKS_PER_HAND }, (_unused, index) => (
-        <View key={index} style={[styles.pip, index < result.makerTricks && styles.pipWon]} />
+        <View
+          key={index}
+          style={[styles.pip, index < result.makerTricks && styles.pipWon]}
+        />
       ))}
     </View>
     <Text style={styles.points}>
@@ -58,7 +65,12 @@ const styles = StyleSheet.create({
   headlineEuchred: { color: colors.danger },
   call: { ...typography.body, color: colors.ink },
   pips: { flexDirection: "row", gap: 3, paddingVertical: 2 },
-  pip: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.feltDeep },
+  pip: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.feltDeep,
+  },
   pipWon: { backgroundColor: colors.accent },
   points: { ...typography.label, color: colors.inkMuted, fontSize: 10 },
 });

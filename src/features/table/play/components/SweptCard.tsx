@@ -32,14 +32,23 @@ export const SweptCard = ({ card, dimmed, sweep }: SweptCardProps) => {
     progress.value =
       sweep === null
         ? 0
-        : withDelay(HOLD_MS, withTiming(1, { duration: SWEEP_MS, easing: Easing.in(Easing.quad) }));
+        : withDelay(
+            HOLD_MS,
+            withTiming(1, {
+              duration: SWEEP_MS,
+              easing: Easing.in(Easing.quad),
+            }),
+          );
   }, [sweep, progress]);
 
   const dx = (sweep?.x ?? 0) * width;
   const dy = (sweep?.y ?? 0) * height;
   const style = useAnimatedStyle(() => ({
     opacity: 1 - progress.value,
-    transform: [{ translateX: dx * progress.value }, { translateY: dy * progress.value }],
+    transform: [
+      { translateX: dx * progress.value },
+      { translateY: dy * progress.value },
+    ],
   }));
 
   return (

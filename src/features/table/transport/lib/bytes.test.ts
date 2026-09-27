@@ -27,7 +27,9 @@ describe("base64", () => {
   it("decodes what it encodes for every short length", () => {
     for (let length = 0; length < 8; length += 1) {
       const bytes = Uint8Array.from({ length }, (_unused, index) => index * 37);
-      expect(Array.from(fromBase64(toBase64(bytes)))).toEqual(Array.from(bytes));
+      expect(Array.from(fromBase64(toBase64(bytes)))).toEqual(
+        Array.from(bytes),
+      );
     }
   });
 });

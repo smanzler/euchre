@@ -1,7 +1,10 @@
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import type { Seat } from "@/features/euchre/lib/types";
 import { SEAT_NAMES } from "@/features/table/lib/seats";
-import type { LobbySnapshot, SeatKind } from "@/features/table/transport/lib/protocol";
+import type {
+  LobbySnapshot,
+  SeatKind,
+} from "@/features/table/transport/lib/protocol";
 import { ActionButton } from "@/components/ActionButton";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 
@@ -35,9 +38,13 @@ export const SeatList = ({
 }: SeatListProps) => (
   <View style={styles.list}>
     {lobby.players.map((player) => {
-      const canRename = onRename !== undefined && renamable.includes(player.seat);
+      const canRename =
+        onRename !== undefined && renamable.includes(player.seat);
       return (
-        <View key={player.seat} style={[styles.row, player.seat === mySeat && styles.mine]}>
+        <View
+          key={player.seat}
+          style={[styles.row, player.seat === mySeat && styles.mine]}
+        >
           <View style={[styles.dot, player.connected && styles.dotOn]} />
           {canRename ? (
             <TextInput
@@ -98,7 +105,12 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   mine: { borderColor: colors.accent },
-  dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.inkDim },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.inkDim,
+  },
   dotOn: { backgroundColor: colors.good },
   name: { ...typography.body, color: colors.ink, flex: 1 },
   nameInput: {

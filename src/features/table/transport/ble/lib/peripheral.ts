@@ -32,7 +32,9 @@ type NativePeripheral = {
   ): EventSubscription;
 };
 
-const native = requireOptionalNativeModule<NativePeripheral>("EuchreBlePeripheral");
+const native = requireOptionalNativeModule<NativePeripheral>(
+  "EuchreBlePeripheral",
+);
 
 const MISSING_MODULE =
   "Hosting over Bluetooth needs a development build. Run `npx expo prebuild` and install the dev client.";
@@ -41,9 +43,11 @@ export const isPeripheralAvailable = (): boolean =>
   native !== null && Platform.OS !== "web" && native.isSupported();
 
 export const peripheralUnavailableReason = (): string | null => {
-  if (Platform.OS === "web") return "Bluetooth hosting is not available on web.";
+  if (Platform.OS === "web")
+    return "Bluetooth hosting is not available on web.";
   if (native === null) return MISSING_MODULE;
-  if (!native.isSupported()) return "This device cannot advertise over Bluetooth LE.";
+  if (!native.isSupported())
+    return "This device cannot advertise over Bluetooth LE.";
   return null;
 };
 

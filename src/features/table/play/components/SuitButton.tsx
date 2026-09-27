@@ -1,5 +1,10 @@
 import { Pressable, StyleSheet, Text } from "react-native";
-import { type Suit, colorOf, suitName, suitSymbol } from "@/features/euchre/lib/cards";
+import {
+  type Suit,
+  colorOf,
+  suitName,
+  suitSymbol,
+} from "@/features/euchre/lib/cards";
 import { colors, radius } from "@/lib/theme";
 
 const SIZE = 60;
