@@ -115,7 +115,7 @@ const nextIntents: Record<Phase, (view: PlayerView) => PlayerIntent | null> = {
 const seatTable = () => {
   const hostRuntime = new HostRuntime({
     tableName: "Kitchen",
-    hostName: "Sam",
+    host: { kind: "local", name: "Sam" },
     holdsEverySeat: false,
     seed: 4242,
     onChange: () => {},
@@ -218,7 +218,7 @@ describe("host and clients over a framed wire", () => {
   it("frees the seat when a client drops before the deal", () => {
     const hostRuntime = new HostRuntime({
       tableName: "Kitchen",
-      hostName: "Sam",
+      host: { kind: "local", name: "Sam" },
       holdsEverySeat: false,
       seed: 1,
       onChange: () => {},

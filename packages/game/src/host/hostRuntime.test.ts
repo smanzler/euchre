@@ -20,7 +20,7 @@ const hostedTable = () => {
   const changes = { count: 0 };
   const runtime = new HostRuntime({
     tableName: "Kitchen",
-    hostName: "Sam",
+    host: { kind: "local", name: "Sam" },
     holdsEverySeat: false,
     seed: 99,
     onChange: () => {
@@ -197,11 +197,79 @@ describe("HostRuntime play", () => {
   });
 });
 
+describe("HostRuntime remote host", () => {
+  const send = (runtime: HostRuntime, peer: PeerId, message: object): void =>
+    runtime.onMessage(peer, JSON.stringify(message));
+
+  const remoteTable = () => {
+    const sent: Sent[] = [];
+    const runtime = new HostRuntime({
+      tableName: "Online",
+      host: { kind: "remote", peer: "h", name: "Sam" },
+      holdsEverySeat: false,
+      seed: 99,
+      scheduleBotMove: (run) => run(),
+      onChange: () => {},
+    });
+    runtime.attach(fakeTransport(sent));
+    return { runtime, sent };
+  };
+
+  it("seats the host peer and holds no seat on the device", () => {
+    const { runtime, sent } = remoteTable();
+    send(runtime, "h", { t: "hello", name: "Sammy" });
+    expect(runtime.localSeats()).toEqual([]);
+    expect(runtime.lobby().players[0]).toMatchObject({
+      name: "Sammy",
+      kind: "host",
+      connected: true,
+    });
+    expect(lastTo(sent, "h")).toMatchObject({ t: "lobby", seat: 0 });
+  });
+
+  it("takes lobby commands from the host peer", () => {
+    const { runtime, sent } = remoteTable();
+    send(runtime, "p1", { t: "hello", name: "Ada" });
+    send(runtime, "h", { t: "add-bot", seat: 2 });
+    send(runtime, "h", { t: "add-bot", seat: 3 });
+    send(runtime, "h", { t: "rename", seat: 3, name: "Robo" });
+    expect(runtime.lobby().players.map((player) => player.name)).toEqual([
+      "Sam",
+      "Ada",
+      "North bot",
+      "Robo",
+    ]);
+    send(runtime, "h", { t: "start" });
+    expect(runtime.started).toBe(true);
+    expect(lastTo(sent, "p1")).toMatchObject({ t: "view" });
+  });
+
+  it("refuses a lobby command from a guest", () => {
+    const { runtime, sent } = remoteTable();
+    send(runtime, "p1", { t: "hello", name: "Ada" });
+    send(runtime, "p1", { t: "add-bot", seat: 2 });
+    expect(lastTo(sent, "p1")).toEqual({
+      t: "rejected",
+      reason: "only the host can do that",
+    });
+    expect(runtime.lobby().players[2]?.kind).toBe("open");
+  });
+
+  it("never seats a guest in the host seat", () => {
+    const { runtime } = remoteTable();
+    runtime.onPeerLeave("h");
+    send(runtime, "p1", { t: "hello", name: "Ada" });
+    expect(runtime.lobby().players[0]?.kind).toBe("host");
+    expect(runtime.lobby().players[0]?.connected).toBe(false);
+    expect(runtime.lobby().players[1]?.name).toBe("Ada");
+  });
+});
+
 describe("HostRuntime pass and play", () => {
   const passAndPlay = () => {
     const runtime = new HostRuntime({
       tableName: "Kitchen",
-      hostName: "Sam",
+      host: { kind: "local", name: "Sam" },
       holdsEverySeat: true,
       seed: 99,
       onChange: () => {},
@@ -235,7 +303,7 @@ describe("HostRuntime bots", () => {
   const soloTable = () => {
     const runtime = new HostRuntime({
       tableName: "Kitchen",
-      hostName: "Sam",
+      host: { kind: "local", name: "Sam" },
       holdsEverySeat: false,
       seed: 99,
       scheduleBotMove: (run) => run(),
@@ -344,7 +412,7 @@ describe("HostRuntime bots", () => {
     const sent: Sent[] = [];
     const runtime = new HostRuntime({
       tableName: "Kitchen",
-      hostName: "Sam",
+      host: { kind: "local", name: "Sam" },
       holdsEverySeat: false,
       seed: 99,
       scheduleBotMove: (run) => run(),

@@ -16,6 +16,30 @@ describe("messages", () => {
     });
   });
 
+  it("accepts a host command", () => {
+    expect(
+      parseClientMessage(JSON.stringify({ t: "add-bot", seat: 2 })),
+    ).toEqual({ t: "add-bot", seat: 2 });
+    expect(parseClientMessage(JSON.stringify({ t: "start" }))).toEqual({
+      t: "start",
+    });
+  });
+
+  it("rejects a client message with a bad field", () => {
+    const bad = [
+      { t: "intent", intent: { type: "cheat" } },
+      { t: "intent", intent: { type: "play-card", card: "1X" } },
+      { t: "intent", intent: { type: "call-trump", suit: "Z", alone: false } },
+      { t: "add-bot", seat: 7 },
+      { t: "hello", name: "" },
+      { t: "hello", name: "x".repeat(21) },
+      { t: "rename", seat: 1 },
+    ];
+    for (const message of bad) {
+      expect(parseClientMessage(JSON.stringify(message))).toBeNull();
+    }
+  });
+
   it("rejects junk, the wrong direction and unknown tags", () => {
     expect(parseClientMessage("not json")).toBeNull();
     expect(parseClientMessage(JSON.stringify({ t: "view" }))).toBeNull();
