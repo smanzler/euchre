@@ -98,10 +98,25 @@ packages/game/src/
   bots/                    hand values and the move a bot makes
   protocol/                the messages between host and client
   host/                    the host runtime and seat names
+packages/server/src/
+  health/                  GET /health
+  peers/                   GET /ws, and a Transport over its sockets
 ```
 
 `apps/mobile/src/features/table/transport/lib/registry.ts` maps a transport kind to a
 driver. A new way to carry messages is one more driver and one more entry.
+
+## The server
+
+`packages/server` (`@euchre/server`) is the start of online play. It will
+run the host runtime for each table, so every phone joins as a client.
+For now it serves `/health`, and `/ws` gives each socket a peer id and
+carries text both ways. It does not seat players yet.
+
+```sh
+cp packages/server/.env.example packages/server/.env
+pnpm server                # tsx watch on :4000
+```
 
 ## The Bluetooth host
 
