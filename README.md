@@ -38,6 +38,9 @@ runs a full four handed game on one device with no radio at all.
 - **Play against bots** deals you in against three of them, with no radio.
 - **Pass and play** runs all four seats on one device, with a handoff
   screen between turns.
+- **Host online** makes a table on the server and shows its four letter
+  code in the lobby. The phone that made it adds bots and deals.
+- **Join online** takes the code and the next open seat.
 
 The host names any seat it holds in the lobby, so a bot and a shared
 seat read as the person who sits there. A player who joins over
@@ -89,7 +92,8 @@ apps/mobile/
       lobby/, play/        the screens and their parts
       transport/
         lib/               the driver interface, the registry and the framing
-        local/, ble/       one driver each
+        local/, ble/,      one driver each
+        online/
     home/
   src/components/, src/lib/
   modules/euchre-ble-peripheral/
@@ -131,6 +135,11 @@ player leaves. Tables live in memory, so a restart removes them.
 cp packages/server/.env.example packages/server/.env
 pnpm server                # tsx watch on :4000
 ```
+
+To play online from the app, put the server address in
+`apps/mobile/.env` (see `.env.example`) and start Metro again. A phone
+needs your computer's LAN address, not `localhost`. Use `wss://` for a release
+build, because Android release builds block plain `ws://`.
 
 ## The Bluetooth host
 

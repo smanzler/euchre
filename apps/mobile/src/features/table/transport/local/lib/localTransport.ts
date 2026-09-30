@@ -5,6 +5,7 @@ const openLocal = async (options: OpenOptions): Promise<Transport> => {
   options.listener.onStatus("ready", null);
   return {
     kind: "local",
+    tableCode: null,
     async send() {},
     async broadcast() {},
     async stop() {

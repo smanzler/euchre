@@ -6,6 +6,7 @@ import type {
 } from "@euchre/game/protocol/messages";
 import { openTransport, transportDrivers } from "../transport/lib/registry";
 import type {
+  OpenOptions,
   PeerId,
   Transport,
   TransportKind,
@@ -24,6 +25,10 @@ export type TableSnapshot = {
   statusDetail: string | null;
   error: string | null;
   lobby: LobbySnapshot | null;
+  /** The code other players type to join. Only an online table has one. */
+  code: string | null;
+  /** True when this device adds bots, names seats and starts the game. */
+  controlsLobby: boolean;
   view: PlayerView | null;
   seat: Seat | null;
   /** The seats this device may move for. */
@@ -41,6 +46,8 @@ const IDLE: TableSnapshot = {
   statusDetail: null,
   error: null,
   lobby: null,
+  code: null,
+  controlsLobby: false,
   view: null,
   seat: null,
   controlledSeats: [],
@@ -64,6 +71,38 @@ export type JoinOptions = {
   displayName: string;
 };
 
+export type HostOnlineOptions = {
+  tableName: string;
+  displayName: string;
+};
+
+export type JoinOnlineOptions = {
+  code: string;
+  displayName: string;
+};
+
+type LobbyControl = Pick<
+  HostRuntime,
+  "addBot" | "removeBot" | "renameSeat" | "start" | "restart"
+>;
+
+/** Sends the lobby commands to a server that holds the table. */
+const remoteControl = (runtime: ClientRuntime): LobbyControl => ({
+  addBot: (seat) => runtime.command({ t: "add-bot", seat }),
+  removeBot: (seat) => runtime.command({ t: "remove-bot", seat }),
+  renameSeat: (seat, name) => runtime.command({ t: "rename", seat, name }),
+  start: () => runtime.command({ t: "start" }),
+  restart: () => runtime.command({ t: "restart" }),
+});
+
+/** A remote host names only its bots, as HostRuntime allows. */
+const botSeats = (lobby: LobbySnapshot | null): Seat[] =>
+  lobby === null || lobby.started
+    ? []
+    : lobby.players
+        .filter((player) => player.kind === "bot")
+        .map((player) => player.seat);
+
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
@@ -72,6 +111,7 @@ let snapshot: TableSnapshot = IDLE;
 let transport: Transport | null = null;
 let host: HostRuntime | null = null;
 let client: ClientRuntime | null = null;
+let control: LobbyControl | null = null;
 let status: TransportStatus = "idle";
 let statusDetail: string | null = null;
 let error: string | null = null;
@@ -90,6 +130,8 @@ const rebuild = (): void => {
       statusDetail,
       error,
       lobby,
+      code: transport?.tableCode ?? null,
+      controlsLobby: true,
       view: host.view(),
       seat: host.activeLocalSeat(),
       controlledSeats: host.localSeats(),
@@ -99,18 +141,22 @@ const rebuild = (): void => {
     };
   } else if (client !== null) {
     const view = client.view;
+    const lobby = client.lobby;
+    const controls = control !== null;
     snapshot = {
       mode: "joining",
       kind: transport?.kind ?? null,
       status,
       statusDetail,
-      error: error ?? client.lastRejection,
-      lobby: client.lobby,
+      error: error ?? client.closed ?? client.lastRejection,
+      lobby,
+      code: transport?.tableCode ?? null,
+      controlsLobby: controls,
       view,
       seat: client.seat,
       controlledSeats: client.seat === null ? [] : [client.seat],
-      renamableSeats: [],
-      canStart: false,
+      renamableSeats: controls ? botSeats(lobby) : [],
+      canStart: controls && (lobby?.canStart ?? false),
       started: view !== null,
     };
   } else {
@@ -144,9 +190,41 @@ const reset = (): void => {
   transport = null;
   host = null;
   client = null;
+  control = null;
   status = "idle";
   statusDetail = null;
   error = null;
+};
+
+/** Opens a client transport. The creator of an online table controls its lobby. */
+const connectClient = async (
+  kind: Extract<TransportKind, "ble-client" | "online">,
+  open: Omit<OpenOptions, "listener">,
+  controlsLobby: boolean,
+): Promise<void> => {
+  await tableStore.leave();
+  error = null;
+  const runtime = new ClientRuntime({
+    displayName: open.displayName,
+    onChange: rebuild,
+  });
+  client = runtime;
+  control = controlsLobby ? remoteControl(runtime) : null;
+  rebuild();
+  try {
+    transport = await openTransport(kind, {
+      ...open,
+      listener: clientListener(runtime),
+    });
+    runtime.attach(transport);
+    rebuild();
+  } catch (caught: unknown) {
+    error = messageOf(caught);
+    client = null;
+    control = null;
+    rebuild();
+    throw caught;
+  }
 };
 
 export const tableStore = {
@@ -177,6 +255,7 @@ export const tableStore = {
       onChange: rebuild,
     });
     host = runtime;
+    control = runtime;
     if (options.fillWithBots === true) runtime.fillWithBots();
     rebuild();
     try {
@@ -190,57 +269,60 @@ export const tableStore = {
     } catch (caught: unknown) {
       error = messageOf(caught);
       host = null;
+      control = null;
       rebuild();
       throw caught;
     }
   },
 
-  async join(options: JoinOptions): Promise<void> {
-    await tableStore.leave();
-    error = null;
-    const runtime = new ClientRuntime({
-      displayName: options.displayName,
-      onChange: rebuild,
-    });
-    client = runtime;
-    rebuild();
-    try {
-      transport = await openTransport("ble-client", {
+  join(options: JoinOptions): Promise<void> {
+    return connectClient(
+      "ble-client",
+      {
         displayName: options.displayName,
         tableName: "",
         target: options.deviceId,
-        listener: clientListener(runtime),
-      });
-      runtime.attach(transport);
-      rebuild();
-    } catch (caught: unknown) {
-      error = messageOf(caught);
-      client = null;
-      rebuild();
-      throw caught;
-    }
+      },
+      false,
+    );
+  },
+
+  hostOnline(options: HostOnlineOptions): Promise<void> {
+    return connectClient(
+      "online",
+      { displayName: options.displayName, tableName: options.tableName },
+      true,
+    );
+  },
+
+  joinOnline(options: JoinOnlineOptions): Promise<void> {
+    return connectClient(
+      "online",
+      { displayName: options.displayName, tableName: "", target: options.code },
+      false,
+    );
   },
 
   start(): void {
-    host?.start();
+    control?.start();
     rebuild();
   },
 
   restart(): void {
-    host?.restart();
+    control?.restart();
     rebuild();
   },
 
   addBot(seat: Seat): void {
-    host?.addBot(seat);
+    control?.addBot(seat);
   },
 
   removeBot(seat: Seat): void {
-    host?.removeBot(seat);
+    control?.removeBot(seat);
   },
 
   renameSeat(seat: Seat, name: string): void {
-    host?.renameSeat(seat, name);
+    control?.renameSeat(seat, name);
   },
 
   submit(seat: Seat, intent: PlayerIntent): void {

@@ -102,7 +102,7 @@ export const PlayScreen = () => {
           ) : null}
           {view.phase === "game-over" ? (
             <View style={styles.endRow}>
-              {table.mode === "hosting" ? (
+              {table.controlsLobby ? (
                 <ActionButton
                   label="Play again"
                   onPress={() => tableStore.restart()}
