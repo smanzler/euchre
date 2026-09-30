@@ -1,8 +1,8 @@
 import { useSyncExternalStore } from "react";
-import { SEATS, type Seat } from "@/features/euchre/lib/types";
-import { SEAT_NAMES } from "../lib/seats";
+import { SEATS, type Seat } from "@euchre/game/rules/types";
+import { SEAT_NAMES } from "@euchre/game/host/seats";
 import { type TableSnapshot, tableStore } from "../lib/tableStore";
-import type { LobbySnapshot } from "../transport/lib/protocol";
+import type { LobbySnapshot } from "@euchre/game/protocol/messages";
 
 export const useTable = (): TableSnapshot =>
   useSyncExternalStore(

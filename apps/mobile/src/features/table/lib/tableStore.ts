@@ -1,6 +1,9 @@
-import type { GameRules, Seat } from "@/features/euchre/lib/types";
-import type { PlayerView } from "@/features/euchre/lib/view";
-import type { LobbySnapshot, PlayerIntent } from "../transport/lib/protocol";
+import type { GameRules, Seat } from "@euchre/game/rules/types";
+import type { PlayerView } from "@euchre/game/rules/view";
+import type {
+  LobbySnapshot,
+  PlayerIntent,
+} from "@euchre/game/protocol/messages";
 import { openTransport, transportDrivers } from "../transport/lib/registry";
 import type {
   PeerId,
@@ -10,7 +13,7 @@ import type {
   TransportStatus,
 } from "../transport/lib/types";
 import { ClientRuntime } from "./clientRuntime";
-import { HostRuntime } from "./hostRuntime";
+import { HostRuntime } from "@euchre/game/host/hostRuntime";
 
 export type TableMode = "idle" | "hosting" | "joining";
 

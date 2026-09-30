@@ -1,7 +1,12 @@
+import type {
+  PeerId,
+  Transport as PeerTransport,
+} from "@euchre/game/host/transport";
+
+export type { PeerId };
+
 export const TRANSPORT_KINDS = ["local", "ble-host", "ble-client"] as const;
 export type TransportKind = (typeof TRANSPORT_KINDS)[number];
-
-export type PeerId = string;
 
 export type TransportStatus =
   "idle" | "starting" | "ready" | "stopped" | "error";
@@ -13,11 +18,8 @@ export type TransportListener = {
   onStatus(status: TransportStatus, detail: string | null): void;
 };
 
-export type Transport = {
+export type Transport = PeerTransport & {
   readonly kind: TransportKind;
-  send(peer: PeerId, text: string): Promise<void>;
-  broadcast(text: string): Promise<void>;
-  stop(): Promise<void>;
 };
 
 export type OpenOptions = {

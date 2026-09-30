@@ -50,7 +50,7 @@ memory, so it is gone once the app stops.
 ## Bots
 
 A bot is a pure function from the view a seat is allowed to see to the
-move it makes, in `apps/mobile/src/features/table/bots/lib/`. It counts a hand in
+move it makes, in `packages/game/src/bots/`. It counts a hand in
 hundredths of a trick, so a threshold never lands on a floating point
 edge: bowers, trump, off suit aces and a void with trump to ruff. It
 orders up at about three tricks and goes alone near five. In play it
@@ -74,27 +74,30 @@ to ten wins.
 
 ## Layout
 
-This is a pnpm workspace. The app is `apps/mobile` (`@euchre/mobile`), and
-`packages/` holds code that two or more apps use. `pnpm lint`,
-`pnpm typecheck` and `pnpm test` run in every workspace. `pnpm check` runs
-Prettier on the whole repo.
+This is a pnpm workspace. The app is `apps/mobile` (`@euchre/mobile`).
+`packages/game` (`@euchre/game`) holds the code with no react and no io,
+so that a server can use it too. Import it by path, for example
+`@euchre/game/rules/engine`. `pnpm lint`, `pnpm typecheck` and `pnpm test`
+run in every workspace. `pnpm check` runs Prettier on the whole repo.
 
 ```
 apps/mobile/
   app/                     routes; each one re-exports a screen
   src/features/
-    euchre/lib/            the rules, with no react and no io
     table/
-      lib/                 host and client runtimes, and the store the ui reads
-      bots/lib/            hand values and the move a bot makes
+      lib/                 the client runtime, and the store the ui reads
       lobby/, play/        the screens and their parts
       transport/
-        lib/               the driver interface, the registry and the wire format
+        lib/               the driver interface, the registry and the framing
         local/, ble/       one driver each
     home/
   src/components/, src/lib/
   modules/euchre-ble-peripheral/
-packages/                  code that two or more apps use
+packages/game/src/
+  rules/                   the rules
+  bots/                    hand values and the move a bot makes
+  protocol/                the messages between host and client
+  host/                    the host runtime and seat names
 ```
 
 `apps/mobile/src/features/table/transport/lib/registry.ts` maps a transport kind to a

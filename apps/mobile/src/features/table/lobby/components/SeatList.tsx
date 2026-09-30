@@ -1,10 +1,7 @@
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import type { Seat } from "@/features/euchre/lib/types";
-import { SEAT_NAMES } from "@/features/table/lib/seats";
-import type {
-  LobbySnapshot,
-  SeatKind,
-} from "@/features/table/transport/lib/protocol";
+import type { Seat } from "@euchre/game/rules/types";
+import { SEAT_NAMES } from "@euchre/game/host/seats";
+import type { LobbySnapshot, SeatKind } from "@euchre/game/protocol/messages";
 import { ActionButton } from "@/components/ActionButton";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 

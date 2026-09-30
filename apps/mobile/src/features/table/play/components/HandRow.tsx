@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
-import type { Card, Suit } from "@/features/euchre/lib/cards";
-import { sortForHand } from "@/features/euchre/lib/trick";
+import type { Card, Suit } from "@euchre/game/rules/cards";
+import { sortForHand } from "@euchre/game/rules/trick";
 import { colors, spacing, typography } from "@/lib/theme";
 import { CardView, cardBoxOfWidth } from "./CardView";
 

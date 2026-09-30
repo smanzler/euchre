@@ -1,7 +1,7 @@
-import type { Card } from "@/features/euchre/lib/cards";
-import { effectiveSuit, legalPlays } from "@/features/euchre/lib/trick";
-import { DEFAULT_RULES } from "@/features/euchre/lib/types";
-import type { PlayerView } from "@/features/euchre/lib/view";
+import type { Card } from "../rules/cards";
+import { effectiveSuit, legalPlays } from "../rules/trick";
+import { DEFAULT_RULES } from "../rules/types";
+import type { PlayerView } from "../rules/view";
 import { chooseIntent } from "./policy";
 
 const viewWith = (over: Partial<PlayerView>): PlayerView => {

@@ -6,11 +6,11 @@ import {
   rankLabel,
   rankOf,
   suitSymbol,
-} from "@/features/euchre/lib/cards";
-import { type Phase, type Seat, type Team } from "@/features/euchre/lib/types";
-import type { PlayerView } from "@/features/euchre/lib/view";
-import { TEAM_NAMES } from "@/features/table/lib/seats";
-import type { PlayerIntent } from "@/features/table/transport/lib/protocol";
+} from "@euchre/game/rules/cards";
+import { type Phase, type Seat, type Team } from "@euchre/game/rules/types";
+import type { PlayerView } from "@euchre/game/rules/view";
+import { TEAM_NAMES } from "@euchre/game/host/seats";
+import type { PlayerIntent } from "@euchre/game/protocol/messages";
 import { ActionButton } from "@/components/ActionButton";
 import { spacing } from "@/lib/theme";
 import { HandSummary } from "../components/HandSummary";

@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import type { Card, Suit } from "@/features/euchre/lib/cards";
+import type { Card, Suit } from "@euchre/game/rules/cards";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 import { CardView } from "./CardView";
 import { DealerChip } from "./DealerChip";

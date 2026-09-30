@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
-import { suitSymbol } from "@/features/euchre/lib/cards";
+import { suitSymbol } from "@euchre/game/rules/cards";
 import {
   type HandResult,
   type Seat,
   seatsOfTeam,
-} from "@/features/euchre/lib/types";
+} from "@euchre/game/rules/types";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 
 const TRICKS_PER_HAND = 5;

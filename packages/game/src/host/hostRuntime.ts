@@ -1,12 +1,12 @@
-import { applyAction, newGame } from "@/features/euchre/lib/engine";
+import { applyAction, newGame } from "../rules/engine";
 import {
   type GameRules,
   type GameState,
   SEATS,
   type Seat,
-} from "@/features/euchre/lib/types";
-import { type PlayerView, viewFor } from "@/features/euchre/lib/view";
-import { chooseIntent } from "../bots/lib/policy";
+} from "../rules/types";
+import { type PlayerView, viewFor } from "../rules/view";
+import { chooseIntent } from "../bots/policy";
 import {
   type LobbySnapshot,
   type PlayerIntent,
@@ -14,8 +14,8 @@ import {
   type SeatKind,
   parseClientMessage,
   toAction,
-} from "../transport/lib/protocol";
-import type { PeerId, Transport } from "../transport/lib/types";
+} from "../protocol/messages";
+import type { PeerId, Transport } from "./transport";
 import { SEAT_NAMES } from "./seats";
 
 export const HOST_SEAT: Seat = 0;

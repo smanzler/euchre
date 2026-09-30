@@ -5,13 +5,13 @@ import {
   type Suit,
   rankOf,
   suitOf,
-} from "@/features/euchre/lib/cards";
+} from "../rules/cards";
 import {
   effectiveSuit,
   isLeftBower,
   isRightBower,
   isTrump,
-} from "@/features/euchre/lib/trick";
+} from "../rules/trick";
 
 /**
  * Hand values are hundredths of a trick, so a threshold never lands on a

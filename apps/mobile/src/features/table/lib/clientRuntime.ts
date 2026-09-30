@@ -1,10 +1,10 @@
-import type { Seat } from "@/features/euchre/lib/types";
-import type { PlayerView } from "@/features/euchre/lib/view";
+import type { Seat } from "@euchre/game/rules/types";
+import type { PlayerView } from "@euchre/game/rules/view";
 import {
   type LobbySnapshot,
   type PlayerIntent,
   parseHostMessage,
-} from "../transport/lib/protocol";
+} from "@euchre/game/protocol/messages";
 import type { Transport } from "../transport/lib/types";
 
 export type ClientRuntimeOptions = {

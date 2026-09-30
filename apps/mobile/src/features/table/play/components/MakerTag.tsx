@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import { type Suit, suitSymbol } from "@/features/euchre/lib/cards";
+import { type Suit, suitSymbol } from "@euchre/game/rules/cards";
 import { colors, radius, spacing, typography } from "@/lib/theme";
 
 type MakerTagProps = {
